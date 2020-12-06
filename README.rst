@@ -29,7 +29,8 @@ To upgrade **clewsy** using pip::
 Usage
 =====
 
-For detailed instructions of the use of the tool, run the command line
+For instructions of the use of the tool, run the command line
+
 help function::
 
     clewsy --help
@@ -38,3 +39,9 @@ Contributing
 ============
 
 New ideas and bugs `should be submitted: <https://github.com/OSeMOSYS/clewsy/issues/new>`_ to the repository Issue Tracker.
+
+Note
+====
+
+This project has been set up using PyScaffold 3.2.3. For details and usage
+information on PyScaffold see https://pyscaffold.org/.
