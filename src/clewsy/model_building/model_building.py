@@ -528,13 +528,14 @@ def BuildCLEWsModel(data):
         # Create list of crops (or add crops to list), intensities, technology
         for Combo in Clusters[0].split(",")[10:]:
             Crop = ' '.join(Combo.split(' ')[:-2])
+            print(Crop)
             IrrigationType = Combo.split(' ')[-2][0]
             Intensity = Combo.split(' ')[-1][0]
             # We have a crop combination.  We need to check if we have the crop already, and if not add a new crop.
             if Crop in CropList:  # We have already dealt with this crop in another situation...
                 CropCode = CropList[Crop]
             else:
-                CropCode = "CP" + str(CropNumber).zfill(2)
+                CropCode = Crop
                 CropNumber = CropNumber + 1
                 CropList[Crop] = CropCode
                 # And create the crop commodity for final output:
@@ -585,7 +586,7 @@ def BuildCLEWsModel(data):
                         CropComboLabel = CropCode2 + " " + IrrigationTypeList[modeCombo[-1]] + " " + IntensityList[
                             modeCombo[-2]]
                         Location = Clusters[0].strip().split(',').index(CropComboLabel)
-                        Value = float(Clusters[clustercount].split(',')[Location]) * CropYieldFactors[CropComboLabel[0:4]]
+                        Value = float(Clusters[clustercount].split(',')[Location]) * CropYieldFactors[CropComboLabel[0:3]]
                         Value = format(ctx.create_decimal(repr(Value)), 'f')
 
                         AddActivityListItems(Years, Region,
