@@ -528,7 +528,6 @@ def BuildCLEWsModel(data):
         # Create list of crops (or add crops to list), intensities, technology
         for Combo in Clusters[0].split(",")[10:]:
             Crop = ' '.join(Combo.split(' ')[:-2])
-            print(Crop)
             IrrigationType = Combo.split(' ')[-2][0]
             Intensity = Combo.split(' ')[-1][0]
             # We have a crop combination.  We need to check if we have the crop already, and if not add a new crop.
@@ -749,6 +748,13 @@ def BuildCLEWsModel(data):
 
 def main():
     import argparse, yaml
+    ##########
+    # For handling unintentional boolean operators from yaml file
+    from yaml.constructor import Constructor
+    def add_bool(self, node):
+        return self.construct_scalar(node)
+    yaml.SafeLoader.add_constructor(u'tag:yaml.org,2002:bool', add_bool)
+    ##########
     parser = argparse.ArgumentParser()
     parser.add_argument("file", help="Location of YAML file that describes the CLEWs model structure.")
     args = parser.parse_args()
