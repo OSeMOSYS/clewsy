@@ -40,6 +40,12 @@ Contributing
 
 New ideas and bugs `should be submitted: <https://github.com/OSeMOSYS/clewsy/issues/new>`_ to the repository Issue Tracker.
 
+Referncing
+==========
+
+When using **clewsy** for publications and reports, please cite:
+*T. Niet and A. Shivakumar (2020):  clewsy:  Script for building CLEWs models.*
+
 Note
 ====
 

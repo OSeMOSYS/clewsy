@@ -113,6 +113,9 @@ def main(args):
 def run():
     """Entry point for console_scripts
     """
+    print("clewsy CLEWs Model Building Script.")
+    print("When using clewsy please reference:")
+    print("T. Niet and A. Shivakumar (2020):  clewsy:  Script for building CLEWs models.")
     main(sys.argv[1:])
 
 
