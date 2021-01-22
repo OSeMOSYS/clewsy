@@ -1,0 +1,208 @@
+# This file defines the input variables for the clewsy model building script.
+# Based on the data in this file, clewsy builds the SETS, InputActivityRatio and OutputActivityRatio
+
+# The model name here must match the model name in MoManI.
+# It is suggested that the empty shell be uploaded first, and the model in the shell renamed to match the model name here.
+Model: SAMPLE_Model_Name
+
+# Either otoole or MoManI (capitalization matters)
+OutputFormat: MoManI
+otooleOutputDirectory: otoole_output
+
+# The OSeMOSYS regions in the model.  For most models, leave this as REGION1 as CLEWs regions are
+# built with technologies and commodities rather than OSeMOSYS regions.
+Regions: {REGION1: ['Region 1', '#000000']}
+
+# Add or reduce the model time horizon as needed.
+Years:
+  - 2018
+  - 2019
+  - 2020
+  - 2021
+  - 2022
+  - 2023
+  - 2024
+  - 2025
+
+# The labels for the land regions being represented in the model.
+# These must match the file names in the clustered land use data in the data directory.
+# The land regions are usually two or three letter codes.
+LandRegions:
+  - RG1
+  - RG2
+
+# Connecting the land use (and thereby the energy needs) from a given land region to an electrical grid.
+# Each land region must have an associated electrical grid.  Grids have a single letter code.
+LandToGridMap: {
+  RG1: A,  # Region RG1 is connected to grid A
+  RG2: B,  # Region RG2 is connected to grid B
+  RG3: A,  # Region RG3 is connected to grid A
+}
+
+# Data directory and file names for the land use data for the model.
+# The data for region RG1 will be in file data/clustering_results_RG1.csv
+DataDirectoryName:  data
+ClusterBaseFileName: clustering_results_
+PrecipitationClusterBaseFileName: clustering_results_prc_
+EvapotranspirationClusterBaseFileName: clustering_results_evt_
+IrrigationWaterDeficitClusterBaseFileName: clustering_results_cwd_
+
+# Agricultural intensities - generally do not change.
+IntensityList: {
+  L: Low,
+  I: Intermediate,
+  H: High
+}
+
+# Irrigation types - generally do not change.
+IrrigationTypeList: {
+  R: Rain-fed,
+  I: Irrigation
+}
+
+# Land use codes for other lands not included in croplands.
+LandUseCodes: {
+  BAR: Barren and sparsely vegetated land,
+  FOR: Forest land,
+  GRS: Grassland & woodland,
+  BLT: Built-up land,
+  WAT: Water bodies,
+  OTH: Other agricultural land
+}
+
+# Evapotranspiration values for water balances for other land uses.
+# Values given in this sample were taken from the Bolivia model by Abhishek Shivakumar.
+# Generally no need to edit these values.
+EvapotranspirationPercentPRCOtherLandUse: {  
+  BAR: 0.773,
+  FOR: 0.691,
+  GRS: 0.694,
+  BLT: 0.631,
+  WAT: 0.571,
+  OTH: 0.694
+}
+
+# Ratios for how much excess water goes to groudwater vs surface runoff.
+# Values given in this sample were taken from the Bolivia model by Abhishek Shivakumar.
+# Generally no need to edit these values.
+GroundwaterPercentofExcessOtherLandUse: {  
+  BAR: 0.009,
+  FOR: 0.077,
+  GRS: 0.051,
+  BLT: 0.072,
+  WAT: 0.017,
+  OTH: 0.051
+}
+
+# Percent of excess water (Irrigation + Precipitation - Evapotranspiration) that returns as groundwater.
+# for croplands.  Rest returns as Runoff.
+GroundwaterPercentofExcess: 0.051
+
+# Defines the final demand fuels in the model, and the sectors they are used in.
+EndUseFuels: {
+  IND: ['COA', 'LPG', 'KER', 'DSL', 'HFO', 'OHC', 'BIO', 'NGS', 'ELCA02', 'ELCB02'],
+  RES: ['LPG', 'KER', 'BIO', 'NGS', 'ELCA02', 'ELCB02'],
+  COM: ['KER', 'DSL', 'LPG', 'BIO', 'NGS', 'ELCA02', 'ELCB02'],
+  AGR: ['DSL', 'ELCA02', 'ELCB02'],
+  TRA: ['GSL', 'KER', 'DSL', 'HFO', 'NGS', 'ELCA02', 'ELCB02'],
+  OTH: ['CRU', 'KER', 'HFO', 'OHC', 'NGS', 'ELCA02', 'ELCB02']
+}
+
+# Imports and exports - add and remove fuels as needed to represent a given country.
+ImportFuels: ['COA', 'CRU', 'LPG', 'GSL', 'KER', 'DSL', 'HFO']
+ExportFuels: ['COA', 'NGS', 'CRU', 'GSL', 'KER', 'HFO', 'BIO']
+
+# Domestically available fuels.
+DomesticMining: ['COA', 'NGS', 'CRU']
+DomesticRenewables: ['WND', 'HYD', 'BIO', 'SOL', 'GEO']
+
+# Transformation technologies that connect parts of the CLEWs model together.  For example, power transmission between grids, 
+# oil refineries, biofuel plants, etc.
+# Note:  These technologies cannot create fuels but assume that their fuels are created elsewhere
+#   (either in the DomesticMining, DomesticRenewables or ImportFuels).
+# Structure:
+#   ['TECHNOLOGY', 'INPUTFUEL', 'IAR', 'OUTPUTFUEL', 'OAR', 'Name', 'ModeOfOperation']
+# One can use multiple lines for a single technology to create additional input or output activity ratios for
+# a given technology (such as the refinery example below).
+TransformationTechnologies: [
+# Example of 90% efficient grid distribution system:
+  ['PWRTRNA01', 'ELCA01', '1.11', 'ELCA02', '1', 'Power transmission grid A', '1'],
+  ['PWRTRNB01', 'ELCB01', '1.11', 'ELCB02', '1', 'Power transmission grid B', '1'],
+
+# Example of grid to grid transmission lines:
+  ['PWRTRNSJ1', 'ELCA02', '1.05', 'ELCB01', '1', 'Power Transmission between A and B.', '1'],
+  ['PWRTRNSJ1', 'ELCB02', '1.05', 'ELCA01', '1', '', '2'],
+
+# Example of a crude oil refinery that produces a number of output products.
+  ['UPSCRU001', 'CRU', '1.0', 'LPG', '0.0081', 'Crude oil refinery', '1'],
+  ['UPSCRU001', '', '', 'GSL', '0.1694', 'Crude oil refinery', '1'],
+  ['UPSCRU001', '', '', 'KER', '0.0694', '', '1'],
+  ['UPSCRU001', '', '', 'DSL', '0.3221', '', '1'],
+  ['UPSCRU001', '', '', 'HFO', '0.1429', '', '1'],
+  ['UPSCRU001', '', '', 'OHC', '0.0816', '', '1']
+]
+
+# List of power plants.
+# Format is:
+#  PLANTCODE:  ['Power plant description.', InputActivityRatio, WaterWithdrawals, WaterReturnedAsSurfaceWater]
+PowerPlants: {
+  PWRCOAA01: ['Coal power station on grid A.', 2.7, 0.0147, 0.014],
+  PWRNGSB01: ['Natural gas power station on grid B.', 2.7, 0.0147, 0.014],
+}
+
+# Emissions to be tracked in the model.
+Emissions: {
+  CO2: ['Carbon dioxide emissions.', '#00cc66']
+}
+
+# Timeslices to define for the model.
+Timeslices: {
+  SEA1BAS: ['Season 1 baseload', '#000000'],
+  SEA1INT: ['Season 1 intermediate', '#cc9900'],
+  SEA1PEK: ['Season 1 peak', '#00cc66'],
+  SEA2BAS: ['Season 2 baseload', '#ffffcc'],
+  SEA2INT: ['Season 2 intermediate', '#99ff66'],
+  SEA2PEK: ['Season 2 peak', '#cc3333']
+}
+
+# Crop yield factors for calibrating the model.  Codes here must match crop codes in the land use data.
+CropYieldFactors: {
+    FLX: 0.95,
+    MZE: 0.95,
+    OAT: 0.95,
+}
+
+# Naming conventions for fuels and other technologies above.
+NamingConvention: {
+  IND: 'Industry',
+  RES: 'Residential',
+  COM: 'Commercial',
+  AGR: 'Agricultural',
+  TRA: 'Transport',
+  OTH: 'Other',
+  BIO: 'Biomass',
+  COA: 'Coal',
+  CRU: 'Crude oil',
+  DSL: 'Diesel', 
+  ELCA01: 'Electricity from power plants in region A',
+  ELCA02: 'Electricity from transmission in region A',
+  ELCB01: 'Electricity from power plants in region B',
+  ELCB02: 'Electricity from transmission in region B',
+  GSL: 'Gasoline', 
+  HFO: 'Heavy fuel oil',
+  NGS: 'Natural gas',
+  KER: 'Kerosene',  
+  LPG: 'LPG', 
+  OHC: 'Other hydrocarbons',
+  GEO: 'Geothermal', 
+  HYD: 'Hydropower', 
+  SOL: 'Solar', 
+  WND: 'Wind',
+  CHC: 'Charcoal',
+  PCK: 'Petroleum coke',
+  JFL: 'Jet fuel'  
+}
+
+
+
+

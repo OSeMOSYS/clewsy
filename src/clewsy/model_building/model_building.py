@@ -47,7 +47,7 @@ def Updateotoole(SetNames, NewSetItems, IARList, OARList, otooleOutputDirectory)
             f.write(str(item['c'][0])+','+str(item['c'][1])+','+str(item['c'][2])+','+str(item['c'][3])+','+str(item['c'][4])+','+str(item['v'])+'\n')
 
 def UpdateMoManI(Model, SetNames, NewSetItems, NewSetGroups, IARList, OARList):
-
+    import sys
     import pymongo
     from bson.objectid import ObjectId
     from bson.binary import Binary
@@ -351,22 +351,6 @@ def BuildCLEWsModel(data):
                 v = str(PowerPlants[powerplant][2]))
         AddActivityListItems(Years, Region, powerplant, "WTRSUR" + LandRegion, OARList, value = str(PowerPlants[powerplant][3]),
                 v = str(PowerPlants[powerplant][3]))
-
-
-    for transformationtech in TransformationTechnologies:
-        if not transformationtech[0] in [li['value'] for li in NewSetItems[SetNames.index("TECHNOLOGY")]]:
-            NewSetItems[SetNames.index("TECHNOLOGY")].append(
-                {"value": transformationtech[0], "name": transformationtech[5], "color": "#000000"})
-
-        if transformationtech[1] != '':
-            AddActivityListItems(Years, Region, transformationtech[0], transformationtech[1], IARList, value = str(transformationtech[2]),
-                g = transformationtech[6], v = str(transformationtech[2]))
-
-        if transformationtech[3] != '':
-            AddActivityListItems(Years, Region, transformationtech[0], transformationtech[3], OARList, value = str(transformationtech[4]),
-                g = transformationtech[6], v = str(transformationtech[4]))
-
-
 
     # Create import fuels
     for fuel in ImportFuels:
@@ -705,6 +689,40 @@ def BuildCLEWsModel(data):
                 AddActivityListItems(Years, Region,
                         "LNDAGR" + LandRegion + "C" + line.split(',')[0].zfill(2),
                         "WTRSUR" + LandRegion, OARList, g = str(ModeNum + 1), v = str(RunoffValue))
+
+    # Add in the transformation technologies
+    for transformationtech in TransformationTechnologies:
+        # Create the technology if it does not exist:
+        if not transformationtech[0] in [li['value'] for li in NewSetItems[SetNames.index("TECHNOLOGY")]]:
+            NewSetItems[SetNames.index("TECHNOLOGY")].append(
+                {"value": transformationtech[0], "name": transformationtech[5], "color": "#000000"})
+       
+        # Create the fuel and the IAR (if there is one specified)
+        if transformationtech[1] != '':
+            # Create the fuel if it doesn't already exist
+            if not transformationtech[1] in [li['value'] for li in NewSetItems[SetNames.index("COMMODITY")]]:
+                NewSetItems[SetNames.index("COMMODITY")].append(
+                    {"value": transformationtech[1], "name":'', "color": "#000000"})
+                print("")
+                print(
+                    "\x1b[0;30;41mWarning:  Fuel " + transformationtech[1] + " created for transformation tech "+transformationtech[0]+".\x1b[0m")
+                print("")
+            # Add the IAR
+            AddActivityListItems(Years, Region, transformationtech[0], transformationtech[1], IARList, value = str(transformationtech[2]),
+                g = transformationtech[6], v = str(transformationtech[2]))
+        # Create the fuel and the OAR (if there is one specified)
+        if transformationtech[3] != '':
+            # Create the commodity if it doesn't already exist
+            if not transformationtech[3] in [li['value'] for li in NewSetItems[SetNames.index("COMMODITY")]]:
+                NewSetItems[SetNames.index("COMMODITY")].append(
+                    {"value": transformationtech[3], "name": '', "color": "#000000"})
+                print("")
+                print(
+                    "\x1b[0;30;41mWarning:  Fuel " + transformationtech[3] + " created for transformation tech "+transformationtech[0]+".\x1b[0m")
+                print("")
+            # Add the OAR
+            AddActivityListItems(Years, Region, transformationtech[0], transformationtech[3], OARList, value = str(transformationtech[4]),
+                g = transformationtech[6], v = str(transformationtech[4]))
 
 
     # ************************* #
