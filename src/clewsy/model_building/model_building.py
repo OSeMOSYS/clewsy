@@ -216,6 +216,7 @@ def BuildCLEWsModel(data):
     
     import colorama
     import decimal
+    import collections
     colorama.init()
     
     # create a decimal context
@@ -249,6 +250,9 @@ def BuildCLEWsModel(data):
     CropYieldFactors = data['CropYieldFactors']
     GroundwaterPercentofExcess = data['GroundwaterPercentofExcess']
     LandUseCodes = data['LandUseCodes']
+    # Sort land use codes so it makes the visualization script more effective
+    LandUseCodes = collections.OrderedDict(sorted(LandUseCodes.items()))
+    
     EvapotranspirationPercentPRCOtherLandUse = data['EvapotranspirationPercentPRCOtherLandUse']
     GroundwaterPercentofExcessOtherLandUse = data['GroundwaterPercentofExcessOtherLandUse']
 
