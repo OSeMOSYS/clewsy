@@ -642,23 +642,19 @@ def BuildCLEWsModel(data):
                 ModeNum = ModeNumber - 1
                 ModeNumber = ModeNumber + 1
                 # print(str(ModeNum)+LandUse+ModeList[ModeNum])
-            # print(str(ModeNum)+LandUse+ModeList[ModeNum])
-            # Now add the land use sets, IAR and OAR to connect to the LNDAGR technologies...
-            Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", "LND" + LandUseCode + LandRegion, "#000000",
-            LandUse + " technology in " + LandRegion + ".")
-            Fill_Set(NewSetItems, SetNames, "COMMODITY", "L" + LandUseCode + LandRegion, "#000000",
-            LandUse + " commodity in " + LandRegion + ".")
+                # print(str(ModeNum)+LandUse+ModeList[ModeNum])
+                # Now add the land use sets, IAR and OAR to connect to the LNDAGR technologies...
+                Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", "LND" + LandUseCode + "TOT", "#000000", LandUse + " technology in " + "TOT" + ".")
+                Fill_Set(NewSetItems, SetNames, "COMMODITY", "L" + LandUseCode + "TOT", "#000000", LandUse + " commodity in " + "TOT" + ".")
 
-            # LSOU becomes LNDFORSOU, etc. in mode 1
-            AddActivityListItems(Years, Region, "LND" + LandUseCode + LandRegion, "L" + LandRegion, IARList, value = "1")
+                AddActivityListItems(Years, Region, "LND" + LandUseCode + "TOT", "L" + "TOT", IARList, value = "1")
 
-            # LNDFORSOU becomes LFORSOU, etc. in mode 1
-            AddActivityListItems(Years, Region, "LND" + LandUseCode + LandRegion, "L" + LandUseCode + LandRegion, OARList, value = "1")
+                AddActivityListItems(Years, Region, "LND" + LandUseCode + "TOT", "L" + LandUseCode + "TOT", OARList, value = "1")
 
             for line in Clusters[1:]:  # Have to have the output for all lines...
                 # LSOU becomes LNDFORSOU, etc. in specified mode
                 AddActivityListItems(Years, Region, "LNDAGR" + LandRegion + "C" + line.split(',')[0].zfill(2),
-                "L" + LandUseCode + LandRegion, IARList, value = "1", g = str(ModeNum + 1)) # print(Sets)
+                "L" + LandUseCode + "TOT", IARList, value = "1", g = str(ModeNum + 1)) # print(Sets)
 
 
                 # Now add precipitation and water balance inputs and outputs
