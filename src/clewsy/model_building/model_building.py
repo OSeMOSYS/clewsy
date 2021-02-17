@@ -414,6 +414,11 @@ def BuildCLEWsModel(data):
     ModeList = []
     ModeNumber = 1
 
+
+    Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", "MINLND" + "TOT", "#000000", "Land suuply technology.")
+    Fill_Set(NewSetItems, SetNames, "COMMODITY", "L" + "TOT", "#000000", "Land resource.")
+    AddActivityListItems(Years, Region, "MINLND" + "TOT", "L" + "TOT", OARList, value = "1")
+
     for LandRegion in LandRegions:
         ###############################
         # Inputs for agricultural groundwater and electricity for pumping:
@@ -500,9 +505,10 @@ def BuildCLEWsModel(data):
         #        Item = {"c":Sets, "v":Value}
         #        OARList.append(Item)    ###############################
         # Land resource
-        Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", "MINLND" + LandRegion, "#000000", "Land suuply in ")
-        Fill_Set(NewSetItems, SetNames, "COMMODITY", "L" + LandRegion, "#000000", "Land resource in " + LandRegion + ".")
-        AddActivityListItems(Years, Region, "MINLND" + LandRegion, "L" + LandRegion, OARList, value = "1")
+        # Moved to outside for loop:
+        # Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", "MINLND" + "TOT", "#000000", "Land suuply technology.")
+        # Fill_Set(NewSetItems, SetNames, "COMMODITY", "L" + "TOT", "#000000", "Land resource.")
+        # AddActivityListItems(Years, Region, "MINLND" + "TOT", "L" + "TOT", OARList, value = "1")
 
         ###############################
         # Cluster specific technologies for different crops, etc...
@@ -536,13 +542,13 @@ def BuildCLEWsModel(data):
                 CropComboList[CropCode + Intensity + IrrigationType] = CropCombo
                 ModeList.append(CropCombo)
                 ModeNumber = ModeNumber + 1
-            # This crop combo might exist in other regions, but we need to add it to this region...
-            Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", "LND" + CropCombo + LandRegion, "#000000",
-            "Land resource technology for crop combo " + Combo)
-            Fill_Set(NewSetItems, SetNames, "COMMODITY", "L" + CropCombo + LandRegion, "#000000",
-            "Land resource commodity for crop combo " + Combo)
-            AddActivityListItems(Years, Region, "LND" + CropCombo + LandRegion, "L" + LandRegion, IARList, value = "1")
-            AddActivityListItems(Years, Region, "LND" + CropCombo + LandRegion, "L" + CropCombo + LandRegion, OARList, value = "1")
+                # And add the links in for this technology to the land
+                Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", "LND" + CropCombo + "TOT", "#000000",
+                "Land resource technology for crop combo " + Combo)
+                Fill_Set(NewSetItems, SetNames, "COMMODITY", "L" + CropCombo + "TOT", "#000000",
+                "Land resource commodity for crop combo " + Combo)
+                AddActivityListItems(Years, Region, "LND" + CropCombo + "TOT", "L" + "TOT", IARList, value = "1")
+                AddActivityListItems(Years, Region, "LND" + CropCombo + "TOT", "L" + CropCombo + "TOT", OARList, value = "1")
 
         # Crops and land tracking commodities have been created.  Now create land technologies to connect them together.
         for clustercount in range(1, len(Clusters)):
@@ -553,7 +559,7 @@ def BuildCLEWsModel(data):
             for mode, modeCombo in enumerate(ModeList):
                 # Add the IAR for the combo into the correct mode.
                 AddActivityListItems(Years, Region, "LNDAGR" + LandRegion + "C" + Clusters[clustercount].split(',')[0].zfill(2),
-                "L" + modeCombo + LandRegion, IARList, value = "1",  g = str(mode + 1))
+                "L" + modeCombo + "TOT", IARList, value = "1",  g = str(mode + 1))
 
                 # And add the OAR for the output crop:
                 # Lookup the OAR from the cluster data:
