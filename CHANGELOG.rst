@@ -2,6 +2,11 @@
 Changelog
 =========
 
+Version 0.2.3a 
+==============
+
+- De-regionalized the upstream technologies to reduce runtimes and simplify models
+
 Version 0.2
 ===========
 
