@@ -1,0 +1,483 @@
+Sat Jun 18 17:56:54 PDT 2022
+/* ASR-TODO>>DONE: Check/confirm w/ Taco full spread validation testing of the completed clewsy_extn */
+
+/* ASR-TODO>>DONE:: Converge on delta w/ Taco:: */
+@ ~/clews_canada_adapt.hlp:: Tagged <ASR- Note:... />
+
+Fri Jun 24 12:48:07 PDT 2022
+/* ASR-TODO>>DONE:: */
+	Add to clewsy::
+		if OutputFormat == 'append_otoole':
+		    Appendotoole(SetNames, NewSetItems, IARList, OARList, otooleOutputDirectory, OsemosysGlobalPath)
+	Generate ~/otoole_output/data_to2050 w/ clewsy[CLEWSCanada_Oct3_2020.yaml]
+
+Wed 20 Jul 2022 10:50:53 AM PDT
+/* ASR-TODO:: */
+	Verify ~/otoole_output/data_to2050 w/ Taco
+
+Fri 22 Jul 2022 07:29:18 PM PDT
+/* ASR-NOTE: Key to ~/base_ref:: */
+ASR-NOTE: *_orig == *_v0; else _v1*
+	Original [https://github.com/OSeMOSYS/clewsy/src/clewsy/model_building/model_building_orig.py + Philippines_CCG_orig.yaml + gis_to_clewsy_results/] >>
+		~/base_ref/clewsy/Philippines_CCG_v0.yaml
+		~/base_ref/clewsy/otoole_output_v0/*
+	Modified [https://github.com/OSeMOSYS/clewsy/src/clewsy/model_building/model_building.py + Philippines_CCG.yaml + gis_to_clewsy_results/] >>
+		~/base_ref/clewsy/Philippines_CCG_v1.yaml
+		~/base_ref/clewsy/otoole_output_v1/*
+
+	/* ASR-NOTE: CLEWSCanada_Oct3_2020_v0.yaml == CLEWSCanada_Oct3_2020_v1.yaml */
+	Original [https://github.com/DeltaE/clews_canada/tree/clews_canada_restruct + CLEWSCanada_Oct3_2020.yaml] >>
+		~/base_ref/clews_canada/CLEWSCanada_Oct3_2020_v0.yaml
+		~/base_ref/clews_canada/otoole_output_v0/*
+	Modified [https://github.com/OSeMOSYS/clewsy/src/clewsy/model_building/model_building.py + CLEWSCanada_Oct3_2020.yaml] >>
+		~/base_ref/clews_canada/CLEWSCanada_Oct3_2020_v1.yaml
+		~/base_ref/clews_canada/otoole_output_v1/*
+
+Wed 27 Jul 2022 04:51:51 PM PDT
+/* ASR-NOTE: Key to ~/base_ref:: */
+	~/clews_canada/clews_canada.py == Original [https://github.com/DeltaE/clews_canada/tree/clews_canada_restruct + CLEWSCanada_Oct3_2020.yaml]
+	~/clewsy/model_building.py == Modified [https://github.com/OSeMOSYS/clewsy/src/clewsy/model_building/model_building.py + Philippines_CCG.yaml + gis_to_clewsy_results/]
+	clews_canada_adapt.hlp == Search tag 'ASR- Note' for differences btw [~/clews_canada/clews_canada.py && ~/clewsy/model_building.py]
+
+Thu 04 Aug 2022 05:15:44 PM PDT
+	Original [https://github.com/OSeMOSYS/clewsy/src/clewsy/model_building/model_building_orig.py + Philippines_CCG_orig.yaml + gis_to_clewsy_results/] >>
+		~/base_ref/clewsy/Philippines_CCG_v0.yaml
+		~/base_ref/clewsy/otoole_output_v0/*
+	== [git diff --no-index --stat otoole_output/ ../base_ref/clewsy/otoole_output_v2/] NIL DIFF
+	~/clewsy/model_building.py == Modified [https://github.com/OSeMOSYS/clewsy/src/clewsy/model_building/model_building.py + Philippines_CCG.yaml + gis_to_clewsy_results/]
+		~/base_ref/clewsy/otoole_output_v2/*
+
+	Original [https://github.com/DeltaE/clews_canada/tree/clews_canada_restruct + CLEWSCanada_Oct3_2020.yaml] >>
+		~/base_ref/clews_canada/CLEWSCanada_Oct3_2020_v0.yaml
+		~/base_ref/clews_canada/otoole_output_v0/*
+	== [git diff --no-index otoole_output/data_to2050/ ../base_ref/clews_canada/otoole_output_v3/data_to2050/] NIL DIFF
+	<TO BE VERIFIED BY TACO w/>
+	Modified [https://github.com/OSeMOSYS/clewsy/src/clewsy/model_building/model_building.py + CLEWSCanada_Oct3_2020.yaml] >>
+		~/base_ref/clews_canada/otoole_output_v3/*
+
+Wed 20 Jul 2022 10:50:53 AM PDT
+/* ASR-TODO>>DONE::Confirm w/ Taco::*/
+@ ~/clewsy/src/clewsy/model_building/model_building.py::
+	import UpdateMoManI(), Updateotoole(), Appendotoole() from
+	@ ~/clewsy/src/clewsy/model_building::
+		UpdateMoManI.py; Updateotoole.py; Appendotoole.py
+vs. inline 'def' of  UpdateMoManI(), Updateotoole(), Appendotoole()
+
+/* ASR-TODO>>DONE::Confirm w/ Taco- move model_building up directly under src. Change::*/
+	@ ~/clewsy/src/clewsy/model_building/model_building.py to
+	@ ~/clewsy/src/model_building/model_building.py
+
+/* ASR-TODO>>DONE:: Ensure execution in:: */
+Runtime::
+	/.clewsy Philippines_CCG.yaml
+&&
+Interpreter::
+python src/clewsy/model_building/model_building.py Philippines_CCG.yaml
+
+Tue 20 Sep 2022 09:27:42 PM PDT
+/* ASR- NOTES: SFU Deltae working session on 20 Sept 2022 */
+1: @ ~/clewsy/CLEWSCanada_Oct3_2020.yaml:
+	Kamaria local system version of input file for SwitchgrassBiofuels
+	Updated to run with clewsy... @ ~/clewsy/::
+		python src/clewsy/model_building/model_building.py CLEWSCanada_Oct3_2020.yaml +
+			@ ~/clewsy/datasets/clustering_output_switchgrass >>
+		generates >>
+			@ ~/clewsy/otoole_output/data_SwitchgrassBiofuels/*.csv
+
+2: @ ~/clewsy/calibrate/
+	calibrate_swbiofuels.py		== @ ~/deltae-clews/KK_fix_csv_versions/fix_csv versions/fix_csv_SWBiofuels.py
+	add_data					== @ ~/deltae-clews/KK_fix_csv_versions/fix_csv versions/AdditionalData/*.{py,csv}
+	data_SwitchgrassBiofuels/	== @ ~/@ ~/clewsy/otoole_output/data_SwitchgrassBiofuels/*.csv
+/* ASR-TODO>>DONE: Fix issues & create a standard yaml adaptation interface file:: */
+
+/* ASR-TODO>>DONE: Review the generalized yaml adaptation & modified calibrate_swbiofuels.py w/ Kamaria & then Taco */
+	cd @ ~/clewsy/calibrate/
+		python calibrate_swbiofuels.py
+
+3: /* ASR-TODO: Work on new inerface to adapt to otootle:: */
+	~\OneDrive - Intel Corporation\Ashok\...\SFU- SustainableEnergyEngineering\Sustainable Energy Models Tools\clewsy-mod\CLEWs Demo.zip
+	Refer to:
+	email xchg w/ vedrankapor@yahoo.com.au
+	https://github.com/VedranKapor/OSEMOSYS
+
+Mon 07 Nov 2022 08:58:15 PM PST
+/* TN-TODO>>DONE: Generalize:: */
+	calibrate_[clewsy-output].py
+	Separate data and code
+	Remove & parameterize all hrad coded values & fields in ~/calibrate_swbiofuels.py
+
+Sun 04 Dec 2022 07:20:34 PM PST
+/* ASR-TODO>>DONE: Parse model_building code:: */
+@ ~/model_building/model_building.py::
+		create_set(...)
+		Fill_Set(...)
+		AddActivityListItems(...)
+
+Mon 12 Dec 2022 07:01:19 PM PST
+/* ASR-TODO: Parse out model_building.py till Ln #537 Create export fuels w/:: */
+ singularized CLEWSCanada_Oct3_2020.yaml @ model_building.dbg
+
+/* ASR-TODO: Build an Excel model of:: */
+	OARlist[] & IARlist[] based on the singularized CLEWSCanada_Oct3_2020.yaml
+
+Fri 30 Dec 2022 08:06:23 AM PST
+/* ASR-TODO>>DONE: Check w/ Taco: */
+	DataDirectoryName: './datasets/clustering_output_switchgrass' <equivalent to == >
+	DataDirectoryName: './datasets/output_45clusters' <REMOVED>
+	They are both different. Which one is required?
+
+/* ASR-TODO>>DONE: w/ Taco:: Remove/Rename:: */
+	calibrate/								>> REMOVE
+	clustering_output_switchgrass/			>> REMOVE? Check this has git diff
+	datasets/								>> RENAME	data-inp		<ASR- Note: place in git ignore />
+	docs/
+	gis_to_clewsy_results/					>> REMOVE? Was original in clewsy (Phillipines)
+	otoole_output/							>> RENAME 	data-out		<ASR- Note: place in git ignore />
+	src/
+	tests/
+	.coveragerc
+	.gitignore
+	AUTHORS.rst
+	CHANGELOG.rst
+	CLEWSCanada.yaml						>> RENAME- Convention CLEWS-<RGN- 3x CAP letters/>.yaml
+	CLEWSCanada_Oct3_2020.yaml				>> REMOVE
+	CLEWSCanada_Oct3_2020_orig.yaml
+	CLEWS_dbg.yaml
+	LICENSE
+	LICENSE.txt
+	ModeList.txt							>> RENAME/MOVE	>> data-out/optn_mds.txt	<ASR- Note: Define optn-mds.txt @ CLEWS-<RGN- 3x CAP letters/>.yaml />
+	Philippines_CCG.yaml					>> REMOVE
+	Philippines_CCG_orig.yaml				>> REMOVE
+	README.rst
+	calibrate.zip							>> REMOVE
+	clustering_output_switchgrass.zip		>> REMOVE
+	model_dbg.log
+	requirements.txt
+	setup.cfg
+	setup.py
+@ ~/datasets/
+	clustering_output_switchgrass/							>> RENAME	gaezclstr-<RGN- 3x CAP letters/>
+	data_to2050_no_oth/										>> RENAME	osemosys-<FLTR- 3x CAP letters/>
+@ ~/clewsy0/src/clewsy/model_building						>> RENAME ~/clewsy/build/
+@ ~/clewsy0/src/clewsy/model_building/model_building.py		>> RENAME ~/clewsy/build/build.py
+@ ~/clewsy0/src/clewsy/model_building/model_building.py  	>> RENAME src/build/build.py
+
+Fri 30 Dec 2022 12:17:52 PM PST
+/* ASR-TODO>>DONE: Implement updates listed in Taco Neit email of Wednesday, November 23, 2022 2:48 PM */
+
+/* ASR-TODO>>DONE: Clean up/Trim all ASR-Probe: statements */
+
+/* ASR-TODO>>DONE: Generate a summary of the yaml file config & seek user approval */
+
+/* ASR-TODO>>DONE: Create/Update README w/ conventions */
+
+/* ASR-TODO>>DONE: Inline a field naming convention at yaml file header */
+
+/* ASR-TODO: Check Outputformats Operation:: */
+    if OutputFormat == 'MoManI':
+        print("Updating MoManI with new data...")
+        UpdateMoManI(Model, SetNames, NewSetItems, NewSetGroups, IARList, OARList)
+
+    if OutputFormat == 'otoole':
+        print("Outputting data in otoole compatible format...")
+        Updateotoole(SetNames, NewSetItems, IARList, OARList, otooleOutputDirectory)
+
+    if OutputFormat == 'append_otoole':
+        Appendotoole(SetNames, NewSetItems, IARList, OARList, otooleOutputDirectory, OsemosysGlobalPath)
+
+Sun 01 Jan 2023 04:14:49 PM PST
+/* ASR-TODO: Close w/ Taco opensource license template */
+
+/* ASR- TODO: Close w/ Taco- Contravening Copyright */
+@ ~/src/build/build.py:: This script (C) Taco Niet 2019-2020
+
+Wed 04 Jan 2023 08:43:20 AM PST
+/* ASR-TODO: Mnemonize 32 field tags in CLEWS-CAN.yaml file:: */
+@ ~/CLEWS-CAN.yaml::
+		Confirm/Agree w/ Taco;
+		Mnemonize tags;
+		Update naming convention tag fields
+
+/* ASR-TODO>>DONE: Decide on Year definiton & usage:: */
+@ ~/src/build/build.py:
+	YearsLst & Years = [str(i) for i in data['Years']]
+
+/* ASR-TODO>>DONE: Understand items(), OrderedDict & how to get python to read yaml elements as listed:: */
+@ ~/src/build/build.py:
+    AgriculturalResidualCapacity = collections.OrderedDict(sorted(AgriculturalResidualCapacity.items()))
+
+/* ASR-TODO>>DONE: After review of O/P w/ Taco delete:: */
+@ ~/CLEWS-CAN.yaml::
+	# ASR-Note: Addition to the yaml file per disucssion w/ Taco on 2nd Jan 2023
+	# End effect desired in:: Ln #1874: ~/clewsyu/calibrate/data_SwitchgrassBiofuels_fixed/ResidualCapacity.csv
+	#   GLOBAL,LNDRAPHIBC,2015,0.00019865
+
+		# ASR-Note: Addition to the yaml file per disucssion w/ Taco on 2nd Jan 2023
+		# End effect desired in:: Ln #1874: ~/clewsyu/calibrate/data_SwitchgrassBiofuels_fixed/ResidualCapacity.csv
+		#   GLOBAL,LNDRAPHIBC,2015,0.00019865
+		#   GLOBAL,LNDRAPHIBC,2016,0.00018540666569999997
+		#   GLOBAL,LNDRAPHIBC,2017,0.0001721633343
+		#   GLOBAL,LNDRAPHIBC,2018,0.00015892
+
+		[Monday 3:03 PM] Taco Niet
+		Hey Ashok - here's some pseudo-code...
+		....
+			In Appendotoole we now need to also append the ResidCapList and append it to the ResidualCapacity.csv.
+
+		print_resdlcap()::(ResidCapList)::
+			RsidCapList[296]= ['GLOBAL', 'LNDWHTIRBC', '2031', 1.6];
+			ResidCapList[297]= ['GLOBAL', 'LNDWHTIRBC', '2032', 1.2];
+			ResidCapList[298]= ['GLOBAL', 'LNDWHTIRBC', '2033', 0.8];
+			ResidCapList[299]= ['GLOBAL', 'LNDWHTIRBC', '2034', 0.4];
+
+
+/* ASR-TODO>>DONE: Replace w/ sorted list of key indices:: */
+@ ~/src/build/build.py:
+    for cropagri in SAgriculturalResidualCap:
+
+/* ASR-TODO>>DONE: Create a Acronym dictionary in the Yaml file and send to DeltaE Team for review */
+/* ASR- NOte: Reviewed w/ DeltaE team. Can be implemented::
+		Once team has accessed clewsy1 base &&
+		Research paper due 01 Feb 2023 has been completed */
+
+Thu 08 Dec 2022 11:44:15 AM PST
+/* ASR-Note: @ ~/CLEWSCanada_Oct3_2020.yaml:: */
+	DataDirectoryName: './datasets/clustering_output_switchgrass' <equivalent to == >
+	DataDirectoryName: './datasets/output_45clusters'
+	Note: Used only in src/clewsy/model_building/model_building.py::
+		Function to APPEND OTOOLE OUTPUT DATA
+	OsemosysGlobalPath: './datasets/data_to2050_no_oth'
+
+Thu 29 Dec 2022 06:36:35 PM PST
+/* ASR-Note: Debug state: */
+@ ~/clewsyu#
+	python src/clewsy/model_building/model_dbg.py CLEWS_dbg.yaml >> generates console o/p captured (copied)
+	@ ~/clewsy/model_dbg.log::
+		# ASR-DBG_TRACE5:
+		# ~/CLEWS_dbg.yaml::
+
+/* ASR-Note: Run state: */
+@ ~/clewsyu#
+ON RE-RUN:
+	python src/clewsy/model_building/model_building.py CLEWSCanada.yaml >> re-generates >>
+	@ ~/otoole_output/data_SwitchgrassBiofuels/
+		-rw-r--r-- 1 root root 6.7K Dec 29 18:44  TECHNOLOGY.csv
+		-rw-r--r-- 1 root root   15 Dec 29 18:44  REGION.csv
+		-rw-r--r-- 1 root root   84 Dec 29 18:44  MODE_OF_OPERATION.csv
+		-rw-r--r-- 1 root root 3.2K Dec 29 18:44  FUEL.csv
+		-rw-r--r-- 1 root root   11 Dec 29 18:44  EMISSION.csv
+		-rw-r--r-- 1 root root 4.1M Dec 29 18:44  InputActivityRatio.csv
+		-rw-r--r-- 1 root root 5.8M Dec 29 18:44  OutputActivityRatio.csv
+		-rw-r--r-- 1 root root 5.1K Dec 29 18:44  CapacityToActivityUnit.csv
+
+ON CLEAN RUN:
+	rm -rf otoole_output/
+	python src/clewsy/model_building/model_building.py CLEWSCanada.yaml >> generates >>
+	@ ~/otoole_output/data_SwitchgrassBiofuels/* */
+
+Fri 06 Jan 2023 09:31:21 PM PST
+/* ASR-Note: Run state: */
+@ ~/clewsy1#
+ON RE-RUN:
+	python src/build/build.py CLEWS-CAN.yaml >> re-generates >>
+	@ ~/data-out/gaezclstr-can/
+	-rw-r--r-- 1 root root  362 Jan  6 21:31  optn_mds.txt
+	-rw-r--r-- 1 root root 6.7K Jan  6 21:31  TECHNOLOGY.csv
+	-rw-r--r-- 1 root root  73K Jan  6 21:31  ResidualCapacity.csv
+	-rw-r--r-- 1 root root 3.2K Jan  6 21:31  FUEL.csv
+	-rw-r--r-- 1 root root 4.7M Jan  6 21:31  InputActivityRatio.csv
+	-rw-r--r-- 1 root root 6.7M Jan  6 21:31  OutputActivityRatio.csv
+	-rw-r--r-- 1 root root 5.1K Jan  6 21:31  CapacityToActivityUnit.csv
+	/* ASR-TODO>>DONE: Check w/ Taco::
+		Files below generated by Appendotoole(...):
+			# Ouptut the sets for otoole: for SetName in SetNames: */
+	-rw-r--r-- 1 root root   15 Jan  6 21:31  REGION.csv
+	-rw-r--r-- 1 root root   84 Jan  6 21:31  MODE_OF_OPERATION.csv
+	-rw-r--r-- 1 root root   11 Jan  6 21:31  EMISSION.csv
+
+ON CLEAN RUN:
+	rm -rf data-out/
+	python src/build/build.py CLEWS-CAN.yaml >> re-generates >>
+	@ ~/data-out/gaezclstr-can/* */
+
+/* ASR-Note: Run state: */
+@ ~/clewsy1#
+FOR DEBUG RUN w/ print outs:
+	python src/build/build_dbg.py CLEWS-CAN.yaml >> re-generates >>
+
+###############################################################
+##### REF SECTION ####
+###############################################################
+Wed 20 Jul 2022 10:21:10 AM PDT
+/* ASR-REF: Commands:: */
+General/Philippines::
+	root@ngic7:/home/sfu-deltae/deltae-clews/clewsy#
+		python src/clewsy/model_building/model_building.py Philippines_CCG.yaml
+clews Canada::
+	root@ngic7:/home/sfu-deltae/deltae-clews/clewsy#
+		python src/clewsy/model_building/model_building.py CLEWSCanada_Oct3_2020.yaml
+
+Fri Jun 17 17:21:47 PDT 2022
+ASR-REF:
+	OSeMOSYS: The Open Source Energy Modeling System: An introduction to its ethos, structure and development
+		https://www.academia.edu/18244885/OSeMOSYS_The_Open_Source_Energy_Modeling_System_An_introduction_to_its_ethos_structure_and_development
+
+	OSeMOSYS Documentation: https://osemosys.readthedocs.io/en/latest/
+	OSeMOSYS Repos: https://github.com/OSeMOSYS
+	OSeMOSYS: Open Source Energy Modelling System
+		https://github.com/OSeMOSYS/OSeMOSYS
+	osemosys_global- A global power system model generator for OSeMOSYS
+		https://github.com/OSeMOSYS/osemosys_global
+	otoole:
+		https://github.com/OSeMOSYS/otoole
+		https://otoole.readthedocs.io/en/latest/
+	clewsy- Tools for building CLEWs models
+		https://github.com/OSeMOSYS/clewsy
+
+ASR-REF: code flow::clewsy::BuildCLEWsModel(data)::
+    # CREATE ENERGY SET INFORMATION
+    ################################################
+    ...
+    # Create set YEARS
+    create_set(SetNames, NewSetItems, NewSetGroups, 'YEAR')
+    for year in Years:
+        ...
+        NewSetItems[SetNames.index('YEAR')].append({'value': year, 'color': '#000000'})
+
+    # Create set EMISSIONS
+    create_set(SetNames, NewSetItems, NewSetGroups, 'EMISSION')
+    ...
+    for emission in Emissions:
+        Fill_Set(NewSetItems, SetNames, "EMISSION", emission, Emissions[emission][1], Emissions[emission][0])
+
+    # Create set TIMESLICE
+    create_set(SetNames, NewSetItems, NewSetGroups, 'TIMESLICE')
+    for timeslice in Timeslices:
+        Fill_Set(NewSetItems, SetNames, "TIMESLICE", timeslice, Timeslices[timeslice][1], Timeslices[timeslice][0])
+
+    # Create set REGION
+    create_set(SetNames, NewSetItems, NewSetGroups, 'REGION')
+    for Region in Regions:
+        Fill_Set(NewSetItems, SetNames, "REGION", Region, Regions[Region][1], Regions[Region][0])
+
+    # Create empty set TECHNOLOGY
+    create_set(SetNames, NewSetItems, NewSetGroups, 'TECHNOLOGY')
+
+    # Create empty set COMMODITY
+    create_set(SetNames, NewSetItems, NewSetGroups, 'COMMODITY')
+
+	# Create sectoral demand technologies
+    for sector in EndUseFuels:
+        for fuel in EndUseFuels[sector]:
+            # Create the demand fuel:
+            Fill_Set(NewSetItems, SetNames, "COMMODITY", sector + fuel, "#000000", "")
+            # Create the demand technology
+            Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", "DEM" + sector + fuel, "#000000", "Demand technology for ")
+		...
+
+    for powerplant in PowerPlants:
+        if not powerplant[3:6] in [li['value'] for li in NewSetItems[SetNames.index("COMMODITY")]]:
+            Fill_Set(NewSetItems, SetNames, "COMMODITY", powerplant[3:6], "#000000", "")
+        if not "PWR" + powerplant[3:6] in [li['value'] for li in NewSetItems[SetNames.index("COMMODITY")]]:
+            Fill_Set(NewSetItems, SetNames, "COMMODITY", "PWR" + powerplant[3:6], "#000000", "")
+		...
+
+    # Create import fuels
+    for fuel in ImportFuels:
+        ...
+        Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", "IMP" + fuel, "#000000",  "")
+        AddActivityListItems(Years, Region, "IMP" + fuel, fuel, OARList, value = "1")
+
+    # Create domestic supply of fuels
+    for fuel in DomesticMining:
+        ...
+        Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", "MIN" + fuel, "#000000",  "")
+        AddActivityListItems(Years, Region, "MIN" + fuel, fuel, OARList, value = "1")
+
+    # Create domestic supply of renewables
+    for fuel in DomesticRenewables:
+        ...
+        Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", "RNW" + fuel, "#000000",  "")
+        AddActivityListItems(Years, Region, "RNW" + fuel, fuel, OARList, value = "1")
+
+    # Create export fuels
+    for fuel in ExportFuels:
+        ...
+        Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", "EXP" + fuel, "#000000",  "")
+        AddActivityListItems(Years, Region, "EXP" + fuel, fuel, IARList, value = "1")
+
+    ################################################
+    # AGRICULTURAL TECHNOLOGIES, FUELS AND Input Activity Ratio (IAR)/Output Activity Ratio (OAR)
+    ################################################
+    Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", "MINLND" + "TOT", "#000000", "Land suuply technology.")
+    Fill_Set(NewSetItems, SetNames, "COMMODITY", "L" + "TOT", "#000000", "Land resource.")
+    AddActivityListItems(Years, Region, "MINLND" + "TOT", "L" + "TOT", OARList, value = "1")
+
+    for LandRegion in LandRegions:
+        # Inputs for agricultural groundwater and electricity for pumping:
+        Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", "DEMAGRGWT" + LandRegion, "#000000", "Agricultural groundwater supply.")
+        Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", "DEMAGRSUR" + LandRegion, "#000000", "Agricultural groundwater supply.")
+        Fill_Set(NewSetItems, SetNames, "COMMODITY", "AGRWAT" + LandRegion, "#000000", "Agricultural water for irrigation.")
+        Fill_Set(NewSetItems, SetNames, "COMMODITY", "WTREVT" + LandRegion, "#000000", "Water lost to evapotranspiration.")
+        Fill_Set(NewSetItems, SetNames, "COMMODITY", "WTRGRC" + LandRegion, "#000000", "Water lost to evapotranspiration.")
+        Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", "DEMPUBGWT" + LandRegion, "#000000", "Agricultural water for irrigation.")
+        Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", "DEMPUBSUR" + LandRegion, "#000000", "Agricultural water for irrigation.")
+        Fill_Set(NewSetItems, SetNames, "COMMODITY", "PUBWAT" + LandRegion, "#000000", "Water lost to evapotranspiration.")
+		...
+
+	# Need a new for loop so we don't add the IAR values for the last few modes to the IAR and OAR above...
+    for LandRegion in LandRegions:
+        # ADD LAST FEW MODES, AND IAR FOR THEM IN LNDAGR technologies
+        for LandUseCode, LandUse in LandUseCodes.items():
+            if LandUse in ModeList:
+                ...
+            else:
+                # Mode doesn't exist, create new mode.
+                ModeList.append(LandUse)
+                ModeNum = ModeNumber - 1
+                ModeNumber = ModeNumber + 1
+                # print(str(ModeNum)+LandUse+ModeList[ModeNum])
+                # print(str(ModeNum)+LandUse+ModeList[ModeNum])
+                # Now add the land use sets, IAR and OAR to connect to the LNDAGR technologies...
+                Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", "LND" + LandUseCode + "TOT", "#000000", LandUse + " technology in " + "TOT" + ".")
+                Fill_Set(NewSetItems, SetNames, "COMMODITY", "L" + LandUseCode + "TOT", "#000000", LandUse + " commodity in " + "TOT" + ".")
+
+                AddActivityListItems(Years, Region, "LND" + LandUseCode + "TOT", "L" + "TOT", IARList, value = "1")
+
+                AddActivityListItems(Years, Region, "LND" + LandUseCode + "TOT", "L" + LandUseCode + "TOT", OARList, value = "1")
+
+			for line in Clusters[1:]:  # Have to have the output for all lines...
+                # LSOU becomes LNDFORSOU, etc. in specified mode
+                AddActivityListItems(Years, Region, "LNDAGR" + LandRegion + "C" + line.split(',')[0].zfill(2),
+                "L" + LandUseCode + "TOT", IARList, value = "1", g = str(ModeNum + 1)) # print(Sets)
+
+                # Now add precipitation and water balance inputs and outputs
+                PrecipitationValue = float(PrecipitationClusters[int(line.split(',')[0])].split(',')[
+                                               1])  # Precipitation values are constant across all technologies/crops in a region.
+                PrecipitationValue = format(ctx.create_decimal(repr(PrecipitationValue)), 'f')
+
+                AddActivityListItems(Years, Region,
+                        "LNDAGR" + LandRegion + "C" + line.split(',')[0].zfill(2),
+                        "WTRPRC" + LandRegion, IARList, g = str(ModeNum + 1), v = str(PrecipitationValue))
+			...
+
+    # Add in the transformation technologies
+    for transformationtech in TransformationTechnologies:
+        ...
+
+    ################################################
+    # CREATE MODES OF OPERATION
+    ################################################
+    SetNames.append("MODE_OF_OPERATION")
+    NewSetItems.append([])
+    NewSetGroups.append([])
+    for index, Mode in enumerate(ModeList):
+        Fill_Set(NewSetItems, SetNames, "MODE_OF_OPERATION", str(index + 1), "#000000", Mode)
+    with open('ModeList.txt', 'w') as ModeFile:
+        ModeFile.write(str(ModeList))
+    ...
+    ################################################
+    # Create Model Output Files
+    ################################################
+	...
+

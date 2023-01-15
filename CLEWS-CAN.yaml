@@ -1,0 +1,302 @@
+# clewsy build parameterization yaml file
+#   Variable definitions to update MoManI | Append/Update otoole models
+
+Acronym_dict: {
+  CCD: 'Country Code',
+  RGN: 'Region Code',
+  FLT: 'Filter Code',
+  IND: 'Industry',
+  RES: 'Residential',
+  COM: 'Commercial',
+  AGR: 'Agricultural',
+  TRA: 'Transport',
+  OTH: 'Other',
+  BIO: 'Biomass',
+  COA: 'Coal',
+  CRU: 'Crude oil',
+  DSL: 'Diesel',
+  ELC001: 'Electricity from power plants',
+  ELC002: 'Electricity from transmission',
+  ELCCANAR01: 'Electricity from power plants in the Atlantic Region', #NS, PEI, NB
+  ELCCANAR02: 'Electricity from transmission in the Atlantic Region',
+  ELCCANNL01: 'Electricity from power plants in Newfoundland and Labrador',
+  ELCCANNL02: 'Electricity from transmission in Newfoundland and Labrador',
+  ELCCANON01: 'Electricity from power plants in Ontario',
+  ELCCANON02: 'Electricity from transmission in Ontario',
+  ELCCANAB01: 'Electricity from power plants in Alberta',
+  ELCCANAB02: 'Electricity from transmission in Alberta',
+  ELCCANBC01: 'Electricity from power plants in British Columbia',
+  ELCCANBC02: 'Electricity from transmission in British Columbia',
+  ELCCANQC01: 'Electricity from power plants in Quebec',
+  ELCCANQC02: 'Electricity from transmission in Quebec',
+  ELCCANSK01: 'Electricity from power plants in Saskatchewan',
+  ELCCANSK02: 'Electricity from transmission in Saskatchewan',
+  ELCCANMB01: 'Electricity from power plants in Manitoba',
+  ELCCANMB02: 'Electricity from transmission in Manitoba',
+  ELCCANNO01: 'Electricity from power plants in the Northern Region', #NT, NU, YT
+  ELCCANNO02: 'Electricity from transmission in the Northern Region',
+  GSL: 'Gasoline',
+  HFO: 'Heavy fuel oil',
+  NGS: 'Natural gas',
+  KER: 'Kerosene',
+  LPG: 'LPG',
+  OHC: 'Other hydrocarbons',
+  GEO: 'Geothermal',
+  HYD: 'Hydropower',
+  SOL: 'Solar',
+  WND: 'Wind',
+  CHC: 'Charcoal',
+  PCK: 'Petroleum coke',
+  JFL: 'Jet fuel',
+# Naming Convention for AgriculturalResidualCapacity
+  RAP: 'Rapeseed (canola)',
+  MZE: 'Maize',
+  WHT:  'Wheat',
+  SWI: 'Switchgrass',
+  OTH: 'Other crops',
+  HI:  'High intensity Irrigated',
+  IR:  'Intermediate intensity Rainfed',
+  II:  'Intermediate intensity Irrigated'
+}
+
+# Model external dependencies: Directories & Files
+################################################################
+Model: CLEWS-CAN
+OutputFormat: append_otoole
+OperationModesOut: 'data-out/optn_mds.txt'
+otooleOutputDirectory: 'data-out'
+DataDirectoryName: './data-inp/gaezclstr-can'
+OsemosysGlobalPath: './data-inp/osemosys-can'
+ClusterBaseFileName: clustering_results_
+PrecipitationClusterBaseFileName: clustering_results_prc_
+EvapotranspirationClusterBaseFileName: clustering_results_evt_
+IrrigationWaterDeficitClusterBaseFileName: clustering_results_cwd_
+
+# Model Time Space parameters: Years, Land, Regions,... TimeSlices
+################################################################
+Years:
+  - 2020
+  - 2021
+  - 2022
+  - 2023
+  - 2024
+  - 2025
+  - 2026
+  - 2027
+  - 2028
+  - 2029
+  - 2030
+  - 2031
+  - 2032
+  - 2033
+  - 2034
+  - 2035
+  - 2036
+  - 2037
+  - 2038
+  - 2039
+  - 2040
+  - 2041
+  - 2042
+  - 2043
+  - 2044
+  - 2045
+  - 2046
+  - 2047
+  - 2048
+  - 2049
+  - 2050
+
+LandRegions:
+  - AB
+  - BC
+  - MB
+  - NU
+  - NB
+  - NL
+  - NS
+  - NT
+  - ON
+  - PE
+  - QC
+  - SK
+  - YT
+
+LandToGridMap: {
+  AB: CANAB, #Alberta
+  BC: CANBC, #British Columbia
+  MB: CANMB, #Manitoba
+  NB: CANAR, #New Brunswick
+  NL: CANNL, #Newfoundland and Labrador
+  NS: CANAR, #Nova Scotia
+  NT: CANNO, #Northwest Territories
+  YT: CANNO, #Yukon
+  NU: CANNO, #Nunavut
+  PE: CANAR, #Prince Edward Island
+  ON: CANON, #Ontario
+  QC: CANQC, #Quebec
+  SK: CANSK, #Saskatchewan
+}
+
+LandUseCodes: {
+  BAR: Barren and sparsely vegetated land,
+  FOR: Forest land,
+  GRS: Grassland & woodland,
+  BLT: Built-up land,
+  WAT: Water bodies,
+  OTH: Other agricultural land  # Do we need this at all???
+}
+
+Regions: {GLOBAL: ['Global', '#000000']}
+
+Timeslices: { #data from osemosys_global
+  SEA1BAS: ['Season 1 baseload', '#000000'],
+  SEA1INT: ['Season 1 intermediate', '#cc9900'],
+  SEA1PEK: ['Season 1 peak', '#00cc66'],
+  SEA2BAS: ['Season 2 baseload', '#ffffcc'],
+  SEA2INT: ['Season 2 intermediate', '#99ff66'],
+  SEA2PEK: ['Season 2 peak', '#cc3333']
+}
+
+# Model Land, Water parameters: Irrigation type, Rainfed,...
+################################################################
+IntensityList: {
+  L: Low,
+  I: Intermediate,
+  H: High
+}
+
+IrrigationTypeList: {
+  R: Rain-fed,
+  I: Irrigation
+}
+
+EvapotranspirationPercentPRCOtherLandUse: {
+  # Percentages taken from Bolivia model by Abhi.
+  BAR: 0.773,
+  FOR: 0.691,
+  GRS: 0.694,  # Numbers from Bolivia.  SET is settled, or BLT.
+  BLT: 0.631,
+  WAT: 0.571,
+  OTH: 0.694   # Used GRS for OTH
+}
+
+GroundwaterPercentofExcessOtherLandUse: {
+  # Since other land types are more likely to have a different ratio.
+  BAR: 0.009,
+  FOR: 0.077,
+  GRS: 0.051,
+  BLT: 0.072,  # Numbers from water ratios from Bolivia.  SET is BLT.
+  WAT: 0.017,
+  OTH: 0.051   # Used GRS for OTH
+}
+
+# Precent of excess water (Irrigation + Precipitation - Evapotranspiration) that returns as groundwater.  Rest returns as Runoff.
+# GroundwaterPercentofExcess: Value for grassland. Need a better number...
+GroundwaterPercentofExcess: 0.051
+
+# Model Energy parameters: Fuels, Transformation Tech,...
+################################################################
+EndUseFuels: {
+  IND: ['COA', 'LPG', 'KER', 'DSL', 'HFO', 'OHC', 'BIO', 'NGS', 'ELCCANAB02', 'ELCCANBC02', 'ELCCANMB02', 'ELCCANNL02', 'ELCCANNO02', 'ELCCANAR02', 'ELCCANON02', 'ELCCANQC02', 'ELCCANSK02'],
+  RES: ['LPG', 'KER', 'BIO', 'NGS', 'ELCCANAB02', 'ELCCANBC02', 'ELCCANMB02', 'ELCCANNL02', 'ELCCANNO02', 'ELCCANAR02', 'ELCCANON02', 'ELCCANQC02', 'ELCCANSK02'],
+  COM: ['KER', 'DSL', 'LPG', 'BIO', 'NGS', 'ELCCANAB02', 'ELCCANBC02', 'ELCCANMB02', 'ELCCANNL02', 'ELCCANNO02', 'ELCCANAR02', 'ELCCANON02', 'ELCCANQC02', 'ELCCANSK02'],
+  AGR: ['DSL', 'ELCCANAB02', 'ELCCANBC02', 'ELCCANMB02', 'ELCCANNL02', 'ELCCANNO02', 'ELCCANAR02', 'ELCCANON02', 'ELCCANQC02', 'ELCCANSK02'],
+  TRA: ['GSL', 'KER', 'DSL', 'HFO', 'NGS', 'ELCCANAB02', 'ELCCANBC02', 'ELCCANMB02', 'ELCCANNL02', 'ELCCANNO02', 'ELCCANAR02', 'ELCCANON02', 'ELCCANQC02', 'ELCCANSK02']
+}
+
+ImportFuels: ['COA', 'CRU', 'LPG', 'GSL', 'KER', 'DSL', 'HFO']
+
+ExportFuels: ['COA', 'NGS', 'CRU', 'GSL', 'KER', 'HFO', 'BIO']
+
+DomesticMining: ['COA', 'NGS', 'CRU']
+
+DomesticRenewables: ['WND', 'HYD', 'BIO', 'SOL', 'GEO']
+
+# Note:  Transformation technologies assume that their fuels are created elsewhere (either in the DomesticMining, DomesticRenewables or ImportFuels.
+TransformationTechnologies: [
+    ['PWRTRNA01', 'ELCCANAB01', '1.11', 'ELCCANAB02', '1', 'Power transmission Alberta', '1'],  # 90% efficient transmission system (losses)
+    ['PWRTRNB01', 'ELCCANBC01', '1.11', 'ELCCANBC02', '1', 'Power transmission British Columbia', '1'],
+    ['PWRTRNM01', 'ELCCANMB01', '1.11', 'ELCCANMB02', '1', 'Power transmission Manitoba', '1'],
+    ['PWRTRNL01', 'ELCCANNL01', '1.11', 'ELCCANNL02', '1', 'Power transmission Newfoundland and Labrador', '1'],
+    ['PWRTRNV01', 'ELCCANNO01', '1.11', 'ELCCANNO02', '1', 'Power transmission in the North', '1'],
+    ['PWRTRNW01', 'ELCCANAR01', '1.11', 'ELCCANAR02', '1', 'Power transmission the Atlantic Region', '1'],
+    ['PWRTRNO01', 'ELCCANON01', '1.11', 'ELCCANON02', '1', 'Power Transmission Ontario', '1'],
+    ['PWRTRNQ01', 'ELCCANQC01', '1.11', 'ELCCANQC02', '1', 'Power Transmission Quebec', '1'],
+    ['PWRTRNS01', 'ELCCANSK01', '1.11', 'ELCCANSK02', '1', 'Power transmission Saskatchewan', '1'],
+
+    # Structure of data is:  [Tech, InFuel, IAR, OutFuel, OAR, Name, Mode]
+    # If the FUEL is '' that piece will not be created.
+    # Name is used only the first time this technology shows up.  Fuels are created only if needed.
+    # If multiple lines for the same technology, this technology will have multiple input and output activity ratios.
+    # Note:  This section can also be used to add input or output fuels to various technologies (cooling water, for example)
+
+    #Switchgrass
+    #17.45 from https://www.ieabioenergy.com/wp-content/uploads/2018/01/IEA_Bioenergy_Task43_PR2011-03.pdf
+    #3.72 same as bio IAR from OG
+    ['RNWBSW', 'CRPSWI', '1.0', 'BSWCAN', '17.45', 'Biomass production from Switchgrass.', '1'],
+    ['RNWBCW', 'CRPSWI', '1.0', 'BCWCAN', '17.45', 'Biomass production with CCS.', '1'],
+
+    ['PWRBSWCANAB01', 'BSWCAN', '3.72', 'ELCCANAB01', '1', 'Powerplant for Switchgrass Biofuel', '1'],
+    ['PWRBSWCANAR01', 'BSWCAN', '3.72', 'ELCCANAR01', '1', 'Powerplant for Switchgrass Biofuel', '1'],
+    ['PWRBSWCANBC01', 'BSWCAN', '3.72', 'ELCCANBC01', '1', 'Powerplant for Switchgrass Biofuel', '1'],
+    ['PWRBSWCANMB01', 'BSWCAN', '3.72', 'ELCCANMB01', '1', 'Powerplant for Switchgrass Biofuel', '1'],
+    ['PWRBSWCANNL01', 'BSWCAN', '3.72', 'ELCCANNL01', '1', 'Powerplant for Switchgrass Biofuel', '1'],
+    ['PWRBSWCANNO01', 'BSWCAN', '3.72', 'ELCCANNO01', '1', 'Powerplant for Switchgrass Biofuel', '1'],
+    ['PWRBSWCANON01', 'BSWCAN', '3.72', 'ELCCANON01', '1', 'Powerplant for Switchgrass Biofuel', '1'],
+    ['PWRBSWCANQC01', 'BSWCAN', '3.72', 'ELCCANQC01', '1', 'Powerplant for Switchgrass Biofuel', '1'],
+    ['PWRBSWCANSK01', 'BSWCAN', '3.72', 'ELCCANSK01', '1', 'Powerplant for Switchgrass Biofuel', '1'],
+
+    ['PWRBCWCANAB01', 'BCWCAN', '3.72', 'ELCCANAB01', '1', 'Powerplant for Switchgrass Biofuel', '1'],
+    ['PWRBCWCANAR01', 'BCWCAN', '3.72', 'ELCCANAR01', '1', 'Powerplant for Switchgrass Biofuel', '1'],
+    ['PWRBCWCANBC01', 'BCWCAN', '3.72', 'ELCCANBC01', '1', 'Powerplant for Switchgrass Biofuel', '1'],
+    ['PWRBCWCANMB01', 'BCWCAN', '3.72', 'ELCCANMB01', '1', 'Powerplant for Switchgrass Biofuel', '1'],
+    ['PWRBCWCANNL01', 'BCWCAN', '3.72', 'ELCCANNL01', '1', 'Powerplant for Switchgrass Biofuel', '1'],
+    ['PWRBCWCANNO01', 'BCWCAN', '3.72', 'ELCCANNO01', '1', 'Powerplant for Switchgrass Biofuel', '1'],
+    ['PWRBCWCANQC01', 'BCWCAN', '3.72', 'ELCCANQC01', '1', 'Powerplant for Switchgrass Biofuel', '1'],
+    ['PWRBCWCANSK01', 'BCWCAN', '3.72', 'ELCCANSK01', '1', 'Powerplant for Switchgrass Biofuel', '1'],
+    ['PWRBCWCANON01', 'BCWCAN', '3.72', 'ELCCANON01', '1', 'Powerplant for Switchgrass Biofuel', '1']
+]
+
+# Power Plants: #Data from osemosys_global
+PowerPlants: {
+}
+
+Emissions: {
+  CO2: ['Carbon dioxide emissions.', '#000000']}
+
+# Model Agriculture & Crop yield  parameters:
+################################################################
+# AgriculturalResidualCapacityRetirementYears
+AgriculturalResidualCapacityRetirementYears: 15
+
+CropYieldFactors: { #keep, change names to match clustering
+    RAP: 1,
+    MZE: 1,
+    WHT: 1,
+    SWI: 1,
+    OTH: 1
+}
+
+AgriculturalResidualCapacity: {
+   RAPHIBC:  5,
+   RAPHRBC:  2,
+   RAPIIBC:  5,
+   RAPIRBC:  6,
+   MZEHIBC:  5,
+   MZEHRBC:  2,
+   MZEIIBC:  5,
+   MZEIRBC:  6,
+   WHTHIBC:  5,
+   WHTHRBC:  2,
+   WHTIIBC:  5,
+   WHTIRBC:  6,
+   SWIHIBC:  5,
+   SWIHRBC:  2,
+   SWIIIBC:  5,
+   SWIIRBC:  6,
+   OTHHIBC:  5,
+   OTHHRBC:  2,
+   OTHIIBC:  5,
+   OTHIRBC:  6
+}
