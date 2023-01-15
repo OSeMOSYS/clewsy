@@ -39,6 +39,8 @@ coverage.xml
 .mypy_cache/
 
 # Build and docs folder/files
+data-inp/*
+data-out/*
 build/*
 dist/*
 sdist/*
