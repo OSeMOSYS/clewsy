@@ -105,6 +105,7 @@ def Appendotoole(SetNames, NewSetItems, ResidCapList, IARList, OARList,
             ResidCapLstItm = ResidCapLstItmStr.replace("'", "")
             ResidCapLstItm = ResidCapLstItm.replace("[", "")
             ResidCapLstItm = ResidCapLstItm.replace("]", '\n')
+            ResidCapLstItm = ResidCapLstItm.replace(" ", "")
             f.write(ResidCapLstItm)
 
     # Output the IAR for otoole:

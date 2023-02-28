@@ -256,6 +256,47 @@ Thu 29 Dec 2022 06:36:35 PM PST
 		# ASR-DBG_TRACE5:
 		# ~/CLEWS_dbg.yaml::
 
+Mon 13 Feb 2023 10:54:50 AM PST
+/* ASR-TODO: otootl data file has GLOBAL " LNDMZEHIBC" 2020 5:: */
+Should read: o	GLOBAL LNDMZEHIBC 2020 5
+	ASR-Note: generate ootole data file and determine cause of error
+	[10:39 AM] Kamaria Kuling
+	https://github.com/OSeMOSYS/otoole
+	GitHub - OSeMOSYS/otoole: OSeMOSYS Tools for Energy
+	OSeMOSYS Tools for Energy. Contribute to OSeMOSYS/otoole development by creating an account on GitHub.
+	[10:40 AM] Kamaria Kuling
+	command: 'otoole convert csv datafile csv folder name new datafile name to generate
+	[10:41 AM] Kamaria Kuling
+	Otoole documentation: https://otoole.readthedocs.io/en/latest/functionality.html
+	Introduction — otoole unknown documentation
+
+/* ASR-TODO: Refer email sub: clewsy next steps/bug fixes Wednesday, February 01, 2023 12:42 PM */
+	2.	Mode of Operation file is being replaced by clewsy instead of appended to?  Have to figure out why it’s not writing out the full file for Mode of Operation
+	<ASR- Note: Append and increment number series:
+	~/data-inp/osemosys-can/ MODE_OF_OPERATION.csv >> ~/data-out/ MODE_OF_OPERATION.csv
+	/>
+
+/* ASR-TODO: Fix this warning... and ensure if the FUEL value exists in the transformation tech & data-inp file, then ignore the field. */
+	Warning:  Fuel ELCCANAB01 created for transformation tech PWRTRNA01.
+	Warning:  Fuel ELCCANAB02 created for transformation tech PWRTRNA01.
+	Warning:  Fuel ELCCANBC01 created for transformation tech PWRTRNB01.
+	Warning:  Fuel ELCCANBC02 created for transformation tech PWRTRNB01.
+	Warning:  Fuel ELCCANMB01 created for transformation tech PWRTRNM01.
+	Warning:  Fuel ELCCANMB02 created for transformation tech PWRTRNM01.
+	Warning:  Fuel ELCCANNL01 created for transformation tech PWRTRNL01.
+/* ASR-TODO: Also normalize CLEWS-CAN.yaml:: */
+TransformationTechnologies: [
+    ['PWRTRNA01', 'ELCCANAB01', '1.11', 'ELCCANAB02', '1', 'Power transmission Alberta', '1'],  # 90% efficient transmission system (losses)
+    ['PWRTRNB01', 'ELCCANBC01', '1.11', 'ELCCANBC02', '1', 'Power transmission British Columbia', '1'],
+    ['PWRTRNM01', 'ELCCANMB01', '1.11', 'ELCCANMB02', '1', 'Power transmission Manitoba', '1'],
+    ['PWRTRNL01', 'ELCCANNL01', '1.11', 'ELCCANNL02', '1', 'Power transmission Newfoundland and Labrador', '1'],
+    ['PWRTRNV01', 'ELCCANNO01', '1.11', 'ELCCANNO02', '1', 'Power transmission in the North', '1'],
+    ['PWRTRNW01', 'ELCCANAR01', '1.11', 'ELCCANAR02', '1', 'Power transmission the Atlantic Region', '1'],
+    ['PWRTRNO01', 'ELCCANON01', '1.11', 'ELCCANON02', '1', 'Power Transmission Ontario', '1'],
+    ['PWRTRNQ01', 'ELCCANQC01', '1.11', 'ELCCANQC02', '1', 'Power Transmission Quebec', '1'],
+    ['PWRTRNS01', 'ELCCANSK01', '1.11', 'ELCCANSK02', '1', 'Power transmission Saskatchewan', '1'],
+
+
 /* ASR-Note: Run state: */
 @ ~/clewsyu#
 ON RE-RUN:
