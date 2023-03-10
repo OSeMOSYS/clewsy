@@ -87,6 +87,7 @@ def Appendotoole(SetNames, NewSetItems, ResidCapList, IARList, OARList,
         with open(os.path.join(otooleOutputDirectory, SetName + '.csv'),'w') as f:
             with open(os.path.join(OsemosysGlobalPath, SetName + '.csv'), 'r') as fin:
                 if SetName == 'MODE_OF_OPERATION':
+                    f.write("VALUE\n")
                     for items in NewSetItems[SetNames.index(SetName)]:
                         f.write(items['value']+'\n')
                 else:
