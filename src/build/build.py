@@ -90,6 +90,11 @@ def Appendotoole(SetNames, NewSetItems, ResidCapList, IARList, OARList,
                     f.write("VALUE\n")
                     for items in NewSetItems[SetNames.index(SetName)]:
                         f.write(items['value']+'\n')
+                # Have to treat both TECHNOLOGY and MODEOFOPERATION differently since clewsy has the full list
+                if SetName == 'TECHNOLOGY':
+                    f.write("VALUE\n")
+                    for items in NewSetItems[SetNames.index(SetName)]:
+                        f.write(items['value']+'\n')
                 else:
                     f.write(fin.read())
                     for items in NewSetItems[SetNames.index(SetName)]:
@@ -453,6 +458,14 @@ def BuildCLEWsModel(data, yaml_file):
 
     # Create empty set TECHNOLOGY
     create_set(SetNames, NewSetItems, NewSetGroups, 'TECHNOLOGY')
+    # And fill it with the existing techs from OSeMOSYS Global if we're appending.
+    if OutputFormat == 'append_otoole':
+        with open(os.path.join(OsemosysGlobalPath, 'TECHNOLOGY.csv'), 'r') as techsin:
+            for tech in techsin:
+                if tech != "VALUE":  # Need this if to make sure we don't load in the header.
+                    Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", tech, "", "")
+    # Once we've done this we need to treat TECHNOLOGY differently in the output section otherwise
+    # everything will be duplicated.
 
     # Create empty set COMMODITY
     create_set(SetNames, NewSetItems, NewSetGroups, 'COMMODITY')
