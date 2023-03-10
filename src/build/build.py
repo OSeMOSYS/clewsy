@@ -95,6 +95,11 @@ def Appendotoole(SetNames, NewSetItems, ResidCapList, IARList, OARList,
                     f.write("VALUE\n")
                     for items in NewSetItems[SetNames.index(SetName)]:
                         f.write(items['value']+'\n')
+                # And COMMODITY as well...
+                if SetName == 'COMMODITY':
+                    f.write("VALUE\n")
+                    for items in NewSetItems[SetNames.index(SetName)]:
+                        f.write(items['value']+'\n')
                 else:
                     f.write(fin.read())
                     for items in NewSetItems[SetNames.index(SetName)]:
@@ -462,13 +467,21 @@ def BuildCLEWsModel(data, yaml_file):
     if OutputFormat == 'append_otoole':
         with open(os.path.join(OsemosysGlobalPath, 'TECHNOLOGY.csv'), 'r') as techsin:
             for tech in techsin:
-                if tech != "VALUE":  # Need this if to make sure we don't load in the header.
-                    Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", tech, "", "")
+                if tech.strip() != "VALUE":  # Need this if to make sure we don't load in the header.
+                    Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", tech.strip(), "", "")
     # Once we've done this we need to treat TECHNOLOGY differently in the output section otherwise
     # everything will be duplicated.
 
     # Create empty set COMMODITY
     create_set(SetNames, NewSetItems, NewSetGroups, 'COMMODITY')
+    # And fill with existing commodities from OSeMOSYS Global.
+    if OutputFormat == 'append_otoole':
+        with open(os.path.join(OsemosysGlobalPath, 'COMMODITY.csv'), 'r') as commsin:
+            for comm in commsin:
+                if tech.strip() != "VALUE":  # Need this if to make sure we don't load in the header
+                    Fill_Set(NewSetItems, SetNames, "COMMODITY", comm.strip(), "", "")
+    # Once we've done this we need to treat TECHNOLOGY differently in the output section otherwise
+    # everything will be duplicated.
 
     # Create sectoral demand technologies
     for sector in EndUseFuels:
