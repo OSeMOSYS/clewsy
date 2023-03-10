@@ -478,7 +478,7 @@ def BuildCLEWsModel(data, yaml_file):
     if OutputFormat == 'append_otoole':
         with open(os.path.join(OsemosysGlobalPath, 'COMMODITY.csv'), 'r') as commsin:
             for comm in commsin:
-                if tech.strip() != "VALUE":  # Need this if to make sure we don't load in the header
+                if comm.strip() != "VALUE":  # Need this if to make sure we don't load in the header
                     Fill_Set(NewSetItems, SetNames, "COMMODITY", comm.strip(), "", "")
     # Once we've done this we need to treat TECHNOLOGY differently in the output section otherwise
     # everything will be duplicated.
