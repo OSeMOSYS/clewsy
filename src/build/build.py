@@ -91,12 +91,12 @@ def Appendotoole(SetNames, NewSetItems, ResidCapList, IARList, OARList,
                     for items in NewSetItems[SetNames.index(SetName)]:
                         f.write(items['value']+'\n')
                 # Have to treat both TECHNOLOGY and MODEOFOPERATION differently since clewsy has the full list
-                if SetName == 'TECHNOLOGY':
+                elif SetName == 'TECHNOLOGY':
                     f.write("VALUE\n")
                     for items in NewSetItems[SetNames.index(SetName)]:
                         f.write(items['value']+'\n')
                 # And COMMODITY as well...
-                if SetName == 'COMMODITY':
+                elif SetName == 'COMMODITY':
                     f.write("VALUE\n")
                     for items in NewSetItems[SetNames.index(SetName)]:
                         f.write(items['value']+'\n')
