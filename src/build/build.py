@@ -830,18 +830,21 @@ def BuildCLEWsModel(data, yaml_file):
 
                 AddActivityListItems(Years, Region, "LND" + LandUseCode + "TOT", "L" + LandUseCode + "TOT", OARList, value = "1")
 
-            for line in Clusters[1:]:  # Have to have the output for all lines...
+            Clusters = open(os.path.join(DataDirectoryName, ClusterBaseFileName + LandRegion + '.csv'), 'r').readlines()
+            for clustercount in range(1, len(Clusters)):
+            # TN CHANGED THIS TO FIX ISSUE WITH CLUSTERS for line in Clusters[1:]:  # Have to have the output for all lines...
                 # LSOU becomes LNDFORSOU, etc. in specified mode
-                AddActivityListItems(Years, Region, "LNDAGR" + LandRegion + "C" + line.split(',')[0].zfill(2),
+                AddActivityListItems(Years, Region, "LNDAGR" + LandRegion + "C" + Clusters[clustercount].split(',')[0].zfill(2),
                 "L" + LandUseCode + "TOT", IARList, value = "1", g = str(ModeNum + 1)) # print(Sets)
+                print("<TN CHECK>: " + "LNDAGR" + LandRegion + "C" + Clusters[clustercount].split(',')[0].zfill(2))
 
                 # Now add precipitation and water balance inputs and outputs
-                PrecipitationValue = float(PrecipitationClusters[int(line.split(',')[0])].split(',')[
-                                               1])  # Precipitation values are constant across all technologies/crops in a region.
+                PrecipitationValue = float(PrecipitationClusters[clustercount].split(",")[1])
+                # Precipitation values are constant across all technologies/crops in a region.
                 PrecipitationValue = format(ctx.create_decimal(repr(PrecipitationValue)), 'f')
 
                 AddActivityListItems(Years, Region,
-                        "LNDAGR" + LandRegion + "C" + line.split(',')[0].zfill(2),
+                        "LNDAGR" + LandRegion + "C" + Clusters[clustercount].split(',')[0].zfill(2),
                         "WTRPRC" + LandRegion, IARList, g = str(ModeNum + 1), v = str(PrecipitationValue))
 
                 # IAR for Irrigation doesn't exist - there is no irrigation for these technologies as they are not agricultural.
@@ -852,7 +855,7 @@ def BuildCLEWsModel(data, yaml_file):
                 # print(str(mode)+" "+modeCombo+ " "+CropCode2+ " "+cropcombo2)
 
                 AddActivityListItems(Years, Region,
-                        "LNDAGR" + LandRegion + "C" + line.split(',')[0].zfill(2),
+                        "LNDAGR" + LandRegion + "C" + Clusters[clustercount].split(',')[0].zfill(2),
                         "WTREVT" + LandRegion, OARList, g = str(ModeNum + 1), v = str(EvapotranspirationValue))
 
                 # OAR for Groundwater
@@ -864,12 +867,12 @@ def BuildCLEWsModel(data, yaml_file):
                 RunoffValue = format(ctx.create_decimal(repr(RunoffValue)), 'f')
 
                 AddActivityListItems(Years, Region,
-                        "LNDAGR" + LandRegion + "C" + line.split(',')[0].zfill(2),
+                        "LNDAGR" + LandRegion + "C" + Clusters[clustercount].split(',')[0].zfill(2),
                         "WTRGRC" + LandRegion, OARList, g = str(ModeNum + 1), v = str(GroundwaterValue))
 
                 # OAR for Runoff
                 AddActivityListItems(Years, Region,
-                        "LNDAGR" + LandRegion + "C" + line.split(',')[0].zfill(2),
+                        "LNDAGR" + LandRegion + "C" + Clusters[clustercount].split(',')[0].zfill(2),
                         "WTRSUR" + LandRegion, OARList, g = str(ModeNum + 1), v = str(RunoffValue))
 
     # Add in the transformation technologies
