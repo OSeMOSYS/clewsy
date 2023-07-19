@@ -1,3 +1,4 @@
+/* Tags: ASR- REF, ASR- Note, REF SECTION, TODO SECTION, CALL_STACK */
 Sat Jun 18 17:56:54 PDT 2022
 /* ASR-TODO>>DONE: Check/confirm w/ Taco full spread validation testing of the completed clewsy_extn */
 
@@ -257,7 +258,7 @@ Thu 29 Dec 2022 06:36:35 PM PST
 		# ~/CLEWS_dbg.yaml::
 
 Mon 13 Feb 2023 10:54:50 AM PST
-/* ASR-TODO: otootl data file has GLOBAL " LNDMZEHIBC" 2020 5:: */
+/* ASR-TODO>>DONE: otootl data file has GLOBAL " LNDMZEHIBC" 2020 5:: */
 Should read: o	GLOBAL LNDMZEHIBC 2020 5
 	ASR-Note: generate ootole data file and determine cause of error
 	[10:39 AM] Kamaria Kuling
@@ -270,13 +271,13 @@ Should read: o	GLOBAL LNDMZEHIBC 2020 5
 	Otoole documentation: https://otoole.readthedocs.io/en/latest/functionality.html
 	Introduction — otoole unknown documentation
 
-/* ASR-TODO: Refer email sub: clewsy next steps/bug fixes Wednesday, February 01, 2023 12:42 PM */
+/* ASR-TODO>>DONE: Refer email sub: clewsy next steps/bug fixes Wednesday, February 01, 2023 12:42 PM */
 	2.	Mode of Operation file is being replaced by clewsy instead of appended to?  Have to figure out why it’s not writing out the full file for Mode of Operation
 	<ASR- Note: Append and increment number series:
 	~/data-inp/osemosys-can/ MODE_OF_OPERATION.csv >> ~/data-out/ MODE_OF_OPERATION.csv
 	/>
 
-/* ASR-TODO: Fix this warning... and ensure if the FUEL value exists in the transformation tech & data-inp file, then ignore the field. */
+/* ASR-TODO>>DONE: Fix this warning... and ensure if the FUEL value exists in the transformation tech & data-inp file, then ignore the field. */
 	Warning:  Fuel ELCCANAB01 created for transformation tech PWRTRNA01.
 	Warning:  Fuel ELCCANAB02 created for transformation tech PWRTRNA01.
 	Warning:  Fuel ELCCANBC01 created for transformation tech PWRTRNB01.
@@ -297,24 +298,78 @@ TransformationTechnologies: [
     ['PWRTRNS01', 'ELCCANSK01', '1.11', 'ELCCANSK02', '1', 'Power transmission Saskatchewan', '1'],
 
 
-/* ASR-Note: Run state: */
-@ ~/clewsyu#
-ON RE-RUN:
-	python src/clewsy/model_building/model_building.py CLEWSCanada.yaml >> re-generates >>
-	@ ~/otoole_output/data_SwitchgrassBiofuels/
-		-rw-r--r-- 1 root root 6.7K Dec 29 18:44  TECHNOLOGY.csv
-		-rw-r--r-- 1 root root   15 Dec 29 18:44  REGION.csv
-		-rw-r--r-- 1 root root   84 Dec 29 18:44  MODE_OF_OPERATION.csv
-		-rw-r--r-- 1 root root 3.2K Dec 29 18:44  FUEL.csv
-		-rw-r--r-- 1 root root   11 Dec 29 18:44  EMISSION.csv
-		-rw-r--r-- 1 root root 4.1M Dec 29 18:44  InputActivityRatio.csv
-		-rw-r--r-- 1 root root 5.8M Dec 29 18:44  OutputActivityRatio.csv
-		-rw-r--r-- 1 root root 5.1K Dec 29 18:44  CapacityToActivityUnit.csv
+Tue 28 Mar 2023 06:20:23 PM PDT
+/* ASR-TODO>>DONE: /home/deltae-clews/clewsy1/CLEWS-CAN.yaml add:: */
+/* ASR-Note: @ src/build/build.py::
+            if RemainingYears > 0:
+                ResCap = cropagri_val * float(RemainingYears)/(float(AgriculturalResidualCapacityRetirementYears))
+Do not derate annually:
+	AgriculturalCapitalCost, AgriculturalVariableCost AgriculturalOperationalLife annually */
+	AgriculturalCapitalCost: {
+		PWRBSWCANQC01 2020 3600
+		PWRBSWCANQC01 2021 3600
+		PWRBSWCANQC01 2022 3600
+		PWRBSWCANQC01 2023 3600
+		...
+		PWRBCWCANQC01 2020 8867
+		...
+	}
+	AgriculturalVariableCost: {
+	   RAPHIBC:  5,
+	   ...
+	   OTHIIBC:  5,
+	   OTHIRBC:  6
+	}
+	AgriculturalOperationalLife: {
+	   RAPHIBC:  5,
+	   ...
+	   OTHIIBC:  5,
+	   OTHIRBC:  6
+	}
 
-ON CLEAN RUN:
-	rm -rf otoole_output/
-	python src/clewsy/model_building/model_building.py CLEWSCanada.yaml >> generates >>
-	@ ~/otoole_output/data_SwitchgrassBiofuels/* */
+Sat 22 Apr 2023 08:16:52 AM PDT
+/* ASR- TODO>>DONE: Change the otoole convert types and check :: */
+	otoole --verbose convert csv datafile data-out data-test-KEN.txt config_otoole.yaml >>
+	otoole --verbose convert csv excel data-out data-test-KEN.xlsx config_otoole.yaml
+
+/* ASR- Note: Install another version of otoole: */
+	pip3 install otoole==1.0.0
+
+Mon 24 Apr 2023 02:15:30 PM PDT
+/* ASR- TODO>>DONE: Add a debug flag CLEWS-KEN.yaml for print("ASR-Probe::...") */
+
+/* ASR- TODO>>DONE: Check run with otoole version 1.0.2 */
+
+Wed 10 May 2023 05:33:18 PM PDT
+/* ASR- TODO>>DONE: Fix otoole -v 1.0.3 error:: */
+	On: python src/build/build.py CLEWS-CAN.yaml data-out/ Operations copy.csv && default.csv
+	On: python src/build/build.py CLEWS-KEN.yaml data-out/ default.csv
+
+Thu 11 May 2023 05:45:02 PM PDT
+/* ASR- TODO: Review warnings:: */
+ python src/build/build.py CLEWS-CAN.yaml >>
+ 	Warning:  Import fuel CRU created for fuel that is not used in any sector.
+	...
+
+/* ASR-Note: otoole alignment: */
+ ~/clewsy1/default.csv not acceptable for [otoole -v 1.0.0 && otoole -v 1.0.3]
+ ~/clewsy1/data-out/osemosys-can|ken/default.csv required for otoole -v 1.0.0; conversion works
+ ~/clewsy1/data-out/osemosys-can|ken/default.csv not acceptable for otoole -v 1.0.3; &&
+ 	when ~/clewsy1/data-out/osemosys-can|ken/default.csv absent otoole -v 1.0.3 conversion error
+		"... otoole.exceptions.OtooleIndexError: DiscountRate -> "
+		"Indices inconsistent between config and data. Config indices are ['REGION']. Data indices are ['REGION', 'TECHNOLOGY']...."
+
+Tue 16 May 2023 03:39:09 PM PDT
+/* ASR- TODO>>DONE: Filter out default_values.csv when generating data-out w/: */
+	On: python src/build/build.py CLEWS-CAN.yaml >> data-out/
+	On: python src/build/build.py CLEWS-KEN.yaml >> data-out/
+
+Sun 21 May 2023 07:50:36 PM PDT
+/* ASR- TODO: Update README.rst:: */
+Run commands:
+	python src/build/build.py CLEWS-CAN.yaml; python src/build/build.py CLEWS-KEN.yaml
+	otoole --verbose convert csv datafile data-out data-test-KEN.txt config_otoole.yaml >>
+	otoole --verbose convert csv excel data-out data-test-KEN.xlsx config_otoole.yaml
 
 Fri 06 Jan 2023 09:31:21 PM PST
 /* ASR-Note: Run state: */
@@ -375,6 +430,9 @@ ASR-REF:
 	clewsy- Tools for building CLEWs models
 		https://github.com/OSeMOSYS/clewsy
 
+###############################################################
+##### CALL_STACK ####
+###############################################################
 ASR-REF: code flow::clewsy::BuildCLEWsModel(data)::
     # CREATE ENERGY SET INFORMATION
     ################################################

@@ -62,8 +62,9 @@ Acronym_dict: {
 # Model external dependencies: Directories & Files
 ################################################################
 Model: CLEWS-CAN
+Debug: 0             # ASR- Note: 1= Debug probes on; 0= No debug probes
 OutputFormat: append_otoole
-OperationModesOut: 'data-out/optn_mds.txt'
+OperationModes: 'optn_mds.txt'
 otooleOutputDirectory: 'data-out'
 DataDirectoryName: './data-inp/gaezclstr-can'
 OsemosysGlobalPath: './data-inp/osemosys-can'
@@ -300,3 +301,31 @@ AgriculturalResidualCapacity: {
    OTHIIBC:  5,
    OTHIRBC:  6
 }
+
+AgriculturalCapitalCost: [
+    ['PWRBSWCANAB01', '3600'],
+    ['PWRBSWCANAR01', '3500'],
+    ['PWRBSWCANBC01', '3400'],
+    ['PWRBSWCANMB01', '3300'],
+    ['PWRBSWCANNL01', '3200'],
+    ['PWRBSWCANNO01', '3100'],
+    ['PWRBSWCANON01', '3000'],
+    ['PWRBSWCANQC01', '2900'],
+    ['PWRBSWCANSK01', '2800']
+]
+
+# AgriculturalVariableCost: {
+#    RAPHIBC:  5,
+#    ...
+#    OTHIIBC:  5,
+#    OTHIRBC:  6
+# }
+#
+# AgriculturalOperationalLife: {
+#    RAPHIBC:  5,
+#    ...
+#    OTHIIBC:  5,
+#    OTHIRBC:  6
+# }
+
+

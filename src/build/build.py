@@ -46,6 +46,33 @@ def Fill_Set(new_set_items, set_names, sets, value1, color1, name1 = '', t = "na
     {"value": value1, t: name1, "color": color1})
 
 ################################################################################
+# Function to convert year to integer
+################################################################
+def convert_dtyp(tmp_file, wrk_file, list_idx):
+    import os
+    import csv
+    with open(tmp_file, 'w') as fout:
+        with open(wrk_file,'r') as fin:
+            writer = csv.writer(fout)
+            reader = csv.reader(fin)
+            row_cnt = 0
+            for row in reader:
+                if row_cnt == 0:
+#                    print("csv header= {0}" .format(row))
+                    writer.writerow(row)
+                    row_cnt = row_cnt + 1
+                else:
+#                   print("row= {0}; row[list_idx]==year= {1}; int(year)= int(row[list_idx])= {2}"
+#                            .format(row, row[list_idx], int(float(row[list_idx]))))
+                    int_year = int(float(row[list_idx]))
+                    row[list_idx] = int_year
+                    writer.writerow(row)
+    print("Removing Original file= {0}; Renaming updated file= {1}..."
+            .format(wrk_file, tmp_file))
+    os.remove(wrk_file)
+    os.rename(tmp_file, wrk_file)
+
+################################################################################
 # Function to OUTPUT TO OTOOLE FORMAT
 ################################################################
 def Updateotoole(SetNames, NewSetItems, IARList, OARList, otooleOutputDirectory):
@@ -74,88 +101,144 @@ def Updateotoole(SetNames, NewSetItems, IARList, OARList, otooleOutputDirectory)
 ################################################################################
 # Function to APPEND OTOOLE OUTPUT DATA
 ################################################################
-def Appendotoole(SetNames, NewSetItems, ResidCapList, IARList, OARList,
-        otooleOutputDirectory, OsemosysGlobalPath):
+def Appendotoole(SetNames, NewSetItems, ResidCapList, CapitalCostList, IARList, OARList,
+        otooleOutputDirectory, OsemosysGlobalPath, Debug):
     import os
     import shutil
+    import csv
     import decimal
+
     if not os.path.exists(otooleOutputDirectory):
         os.makedirs(otooleOutputDirectory)
 
     # Ouptut the sets for otoole:
     for SetName in SetNames:
-        with open(os.path.join(otooleOutputDirectory, SetName + '.csv'),'w') as f:
+        print("ASR-Probe::SetName= {0}..." .format(SetName))
+        with open(os.path.join(otooleOutputDirectory, SetName + '.csv'),'w') as fout:
             with open(os.path.join(OsemosysGlobalPath, SetName + '.csv'), 'r') as fin:
                 if SetName == 'MODE_OF_OPERATION':
-                    f.write("VALUE\n")
+                    fout.write("VALUE\n")
                     for items in NewSetItems[SetNames.index(SetName)]:
-                        f.write(items['value']+'\n')
+                        fout.write(items['value']+'\n')
+                # Scan OsemosysGlobalPath/SetName.csv::Avoid redundancy:
+                #   value= NewSetItems[SetNames.index(SetName)::items[value]
+                elif SetName == 'EMISSION':
+                    print("ASR-Probe::NewSetItems[SetNames.index(SetName)]= {0}"
+                            .format(NewSetItems[SetNames.index(SetName)]))
+                    fout.write("VALUE\n")
+                    for items in NewSetItems[SetNames.index(SetName)]:
+                        print("\titems= {0}; items['value']= {1}"
+                                .format(items, items['value']))
+                        list_idx = 0
+                        reader = csv.reader(fin)
+                        row_cnt = 0
+                        for row in reader:
+                            if row_cnt == 0:
+                                row_cnt = row_cnt + 1
+                            else:
+                               value = row[list_idx]
+                               if items['value'] == value:
+                                   print("\trow= {0}; row[list_idx]==value = {1}" .format(row, value))
+                                   fout.write(items['value']+'\n')
+                               else:
+                                   fout.write(value)
                 # Have to treat both TECHNOLOGY and MODEOFOPERATION differently since clewsy has the full list
                 elif SetName == 'TECHNOLOGY':
-                    f.write("VALUE\n")
+                    fout.write("VALUE\n")
                     for items in NewSetItems[SetNames.index(SetName)]:
-                        f.write(items['value']+'\n')
+                        fout.write(items['value']+'\n')
                 # And COMMODITY as well...
                 elif SetName == 'COMMODITY':
-                    f.write("VALUE\n")
+                    fout.write("VALUE\n")
                     for items in NewSetItems[SetNames.index(SetName)]:
-                        f.write(items['value']+'\n')
+                        fout.write(items['value']+'\n')
                 else:
-                    f.write(fin.read())
+                    fout.write(fin.read())
                     for items in NewSetItems[SetNames.index(SetName)]:
-                        f.write(items['value']+'\n')
+                        fout.write(items['value']+'\n')
 
     # Appendotoole::append ResidCapList[]::
     #   ~/data-in/ResidualCapacity.csv append(ResidCapList[]) >> ~/data-out/ResidualCapacity.csv
     # Output the ResidualCapacity for otoole:
     shutil.copy(os.path.join(OsemosysGlobalPath, 'ResidualCapacity.csv'),
             os.path.join(otooleOutputDirectory, 'ResidualCapacity.csv'))
-    with open(os.path.join(otooleOutputDirectory, 'ResidualCapacity.csv'),'a') as f:
+    with open(os.path.join(otooleOutputDirectory, 'ResidualCapacity.csv'),'a') as fout:
         for n in range(len(ResidCapList)):
             ResidCapLstItmStr = str(ResidCapList[n])
             ResidCapLstItm = ResidCapLstItmStr.replace("'", "")
             ResidCapLstItm = ResidCapLstItm.replace("[", "")
             ResidCapLstItm = ResidCapLstItm.replace("]", '\n')
             ResidCapLstItm = ResidCapLstItm.replace(" ", "")
-            f.write(ResidCapLstItm)
+            fout.write(ResidCapLstItm)
+
+    # Appendotoole::append CapitalCostList[]::
+    #TN I DID NOT UPDATE REST OF COMMENT YET   ~/data-in/ResidualCapacity.csv append(ResidCapList[]) >> ~/data-out/ResidualCapacity.csv
+    # Output the ResidualCapacity for otoole:
+    shutil.copy(os.path.join(OsemosysGlobalPath, 'CapitalCost.csv'),
+            os.path.join(otooleOutputDirectory, 'CapitalCost.csv'))
+    with open(os.path.join(otooleOutputDirectory, 'CapitalCost.csv'),'a') as fout:
+        for n in range(len(CapitalCostList)):
+            CapitalCostLstItmStr = str(CapitalCostList[n])
+            CapitalCostLstItm = CapitalCostLstItmStr.replace("'", "")
+            CapitalCostLstItm = CapitalCostLstItm.replace("[", "")
+            CapitalCostLstItm = CapitalCostLstItm.replace("]", '\n')
+            CapitalCostLstItm = CapitalCostLstItm.replace(" ", "")
+            fout.write(CapitalCostLstItm)
 
     # Output the IAR for otoole:
     #appnd IARList items to otoole output file
-    with open(os.path.join(otooleOutputDirectory, 'InputActivityRatio.csv'),'w') as f:
+    with open(os.path.join(otooleOutputDirectory, 'InputActivityRatio.csv'),'w') as fout:
         with open(os.path.join(OsemosysGlobalPath, 'InputActivityRatio.csv'), 'r') as fin:
-            f.write(fin.read())
+            fout.write(fin.read())
             for item in IARList:
-                f.write(str(item['c'][0])+','+str(item['c'][1])+','+str(item['c'][2])+','+str(item['c'][3])+','+str(item['c'][4])+','+str(item['v'])+'\n')
+                fout.write(str(item['c'][0])+','+str(item['c'][1])+','+str(item['c'][2])+','+str(item['c'][3])+','+str(item['c'][4])+','+str(item['v'])+'\n')
 
     # Output the OAR for otoole:
-    with open(os.path.join(otooleOutputDirectory, 'OutputActivityRatio.csv'),'w') as f:
+    with open(os.path.join(otooleOutputDirectory, 'OutputActivityRatio.csv'),'w') as fout:
         with open(os.path.join(OsemosysGlobalPath, 'OutputActivityRatio.csv'), 'r') as fin:
-            f.write(fin.read())
+            fout.write(fin.read())
             for item in OARList:
-                f.write(str(item['c'][0])+','+str(item['c'][1])+','+str(item['c'][2])+','+str(item['c'][3])+','+str(item['c'][4])+','+str(item['v'])+'\n')
+                fout.write(str(item['c'][0])+','+str(item['c'][1])+','+str(item['c'][2])+','+str(item['c'][3])+','+str(item['c'][4])+','+str(item['v'])+'\n')
 
+    # Copy remaining files in OsemosysGlobalPath >> otooleOutputDirectory
     for file in os.listdir(OsemosysGlobalPath):
         if not os.path.exists(os.path.join(otooleOutputDirectory, file)):
+            if Debug == 1:
+                print("ASR-Probe::file= {0} >> otooleOutputDirectory ={1}" .format(file, otooleOutputDirectory))
             shutil.copyfile(os.path.join(OsemosysGlobalPath, file), os.path.join(otooleOutputDirectory, file))
 
-#    os.remove(otooleOutputDirectory + 'MODE_OF_OPERATION.csv')
-#    shutil.copyfile(OsemosysGlobalPath + 'MODE_OF_OPERATION.csv', otooleOutputDirectory + 'MODE_OF_OPERATION.csv')
-    for file in os.listdir(otooleOutputDirectory):
-            if not os.path.exists(os.path.join(otooleOutputDirectory, file)):
-                with open(file):
-                    reader = csv.reader()
-                    for row in reader:
-                        ctx.create_decimal(row[-1])
+    # Align files @ otooleOutputDirectory
     if 'COMMODITY.csv' in os.listdir(otooleOutputDirectory):
         os.rename(os.path.join(otooleOutputDirectory, 'COMMODITY.csv'), os.path.join(otooleOutputDirectory, 'FUEL.csv'))
     else:
         pass
-    with open(os.path.join(otooleOutputDirectory, 'CapacityToActivityUnit.csv'),'w') as f1:
-        with open(os.path.join(otooleOutputDirectory, 'TECHNOLOGY.csv'),'r') as f2:
-            f1.write('REGION,TECHNOLOGY,VALUE\n')
-            for technology in f2:
+    with open(os.path.join(otooleOutputDirectory, 'CapacityToActivityUnit.csv'),'w') as fout:
+        with open(os.path.join(otooleOutputDirectory, 'TECHNOLOGY.csv'),'r') as fin:
+            fout.write('REGION,TECHNOLOGY,VALUE\n')
+            for technology in fin:
                 if technology.startswith('PWR'):
-                    f1.write('GLOBAL,'+technology[:-1]+',31.536\n')
+                    fout.write('GLOBAL,'+technology[:-1]+',31.536\n')
+
+    # ASR- Note: Fix for non-integer year
+    tmp_file = os.path.join(otooleOutputDirectory, 'CapitalCost_v1.csv')
+    wrk_file = os.path.join(otooleOutputDirectory, 'CapitalCost.csv')
+    list_idx = 2
+    convert_dtyp(tmp_file, wrk_file, list_idx)
+
+    tmp_file = os.path.join(otooleOutputDirectory, 'FixedCost_v1.csv')
+    wrk_file = os.path.join(otooleOutputDirectory, 'FixedCost.csv')
+    list_idx = 2
+    convert_dtyp(tmp_file, wrk_file, list_idx)
+
+    tmp_file = os.path.join(otooleOutputDirectory, 'OutputActivityRatio_v1.csv')
+    wrk_file = os.path.join(otooleOutputDirectory, 'OutputActivityRatio.csv')
+    list_idx = 3
+    convert_dtyp(tmp_file, wrk_file, list_idx)
+
+    tmp_file = os.path.join(otooleOutputDirectory, 'OutputActivityRatio_v1.csv')
+    wrk_file = os.path.join(otooleOutputDirectory, 'OutputActivityRatio.csv')
+    list_idx = 4
+    convert_dtyp(tmp_file, wrk_file, list_idx)
 
 ################################################################################
 # Function to UPDATE MOMANI WITH NEW DATA
@@ -328,6 +411,7 @@ def UpdateMoManI(Model, SetNames, NewSetItems, NewSetGroups, IARList, OARList):
 def BuildCLEWsModel(data, yaml_file):
     import sys
     import os
+    import filecmp
 
     import colorama
     import decimal
@@ -341,8 +425,9 @@ def BuildCLEWsModel(data, yaml_file):
     # Unpacking yaml parameters
     # Model external dependencies: Directories & Files
     Model = data['Model']
+    Debug = data['Debug']
     OutputFormat = data['OutputFormat']
-    OperationModesOut = data['OperationModesOut']
+    OperationModes = data['OperationModes']
     otooleOutputDirectory = data['otooleOutputDirectory']
     DataDirectoryName = data['DataDirectoryName']
     OsemosysGlobalPath = data['OsemosysGlobalPath']
@@ -387,14 +472,16 @@ def BuildCLEWsModel(data, yaml_file):
     AgriculturalResidualCapacity = data['AgriculturalResidualCapacity']
     # ASR- Note: List::SAgriculturalResidualCapacity[] == sorted list of  AgriculturalResidualCapacity[key,... ]
     SAgriculturalResidualCapacity = sorted(data['AgriculturalResidualCapacity'])
+    # ASR- Note: AgriculturalCapitalCost == list of Capital cost for each technology
+    AgriculturalCapitalCost = data['AgriculturalCapitalCost']
 
     print("BuildCLEWsModel w/: yaml file= {0}::"
-        "\n\tModel= {1}; OutputFormat= {2};"
-        "\n\tOperationModesOut= {3}; otooleOutputDirectory= {4}"
-        "\n\tDataDirectoryName= {5}; OsemosysGlobalPath= {6}"
-        "\n\tClusterBaseFileName= {7}; PrecipitationClusterBaseFileName= {8}"
-        "\n\tEvapotranspirationClusterBaseFileName= {9}; IrrigationWaterDeficitClusterBaseFileName= {10}"
-            .format(yaml_file, Model, OutputFormat, OperationModesOut, otooleOutputDirectory,
+        "\n\tModel= {1}; Debug= {2}; OutputFormat= {3};"
+        "\n\tOperationModes= {4}; otooleOutputDirectory= {5}"
+        "\n\tDataDirectoryName= {6}; OsemosysGlobalPath= {7}"
+        "\n\tClusterBaseFileName= {8}; PrecipitationClusterBaseFileName= {9}"
+        "\n\tEvapotranspirationClusterBaseFileName= {10}; IrrigationWaterDeficitClusterBaseFileName= {11}"
+            .format(yaml_file, Model, Debug, OutputFormat, OperationModes, otooleOutputDirectory,
             DataDirectoryName, OsemosysGlobalPath, ClusterBaseFileName, PrecipitationClusterBaseFileName,
             EvapotranspirationClusterBaseFileName, IrrigationWaterDeficitClusterBaseFileName))
     print("--------------------------------\n")
@@ -412,6 +499,7 @@ def BuildCLEWsModel(data, yaml_file):
     IARList = []
     OARList = []
     ResidCapList = []
+    CapitalCostList = []
 
     if OutputFormat != 'append_otoole':
         # Create set YEARS
@@ -830,13 +918,11 @@ def BuildCLEWsModel(data, yaml_file):
 
                 AddActivityListItems(Years, Region, "LND" + LandUseCode + "TOT", "L" + LandUseCode + "TOT", OARList, value = "1")
 
-            Clusters = open(os.path.join(DataDirectoryName, ClusterBaseFileName + LandRegion + '.csv'), 'r').readlines()
+            # AddActivityListItems for each ClusterBaseFileName + LandRegion + '.csv'
             for clustercount in range(1, len(Clusters)):
-            # TN CHANGED THIS TO FIX ISSUE WITH CLUSTERS for line in Clusters[1:]:  # Have to have the output for all lines...
                 # LSOU becomes LNDFORSOU, etc. in specified mode
                 AddActivityListItems(Years, Region, "LNDAGR" + LandRegion + "C" + Clusters[clustercount].split(',')[0].zfill(2),
                 "L" + LandUseCode + "TOT", IARList, value = "1", g = str(ModeNum + 1)) # print(Sets)
-                print("<TN CHECK>: " + "LNDAGR" + LandRegion + "C" + Clusters[clustercount].split(',')[0].zfill(2))
 
                 # Now add precipitation and water balance inputs and outputs
                 PrecipitationValue = float(PrecipitationClusters[clustercount].split(",")[1])
@@ -910,19 +996,34 @@ def BuildCLEWsModel(data, yaml_file):
                 g = transformationtech[6], v = str(transformationtech[4]))
 
     ################################################
-    # CREATE MODES OF OPERATION
+    # ADD MODES OF OPERATION
     SetNames.append("MODE_OF_OPERATION")
     NewSetItems.append([])
     NewSetGroups.append([])
-    print("ASR-Probe::Generating MODE_OF_OPERATION @{0}" .format(OperationModesOut))
+    print("ASR-Probe::Regenerating MODE_OF_OPERATION @{0}" .format(OperationModes))
     for index, Mode in enumerate(ModeList):
         Fill_Set(NewSetItems, SetNames, "MODE_OF_OPERATION", str(index + 1), "#000000", Mode)
-    if not os.path.exists(OperationModesOut):
-        dataout_dir=os.path.dirname(OperationModesOut)
-        print("Creating dataout_dir= {0}" .format(dataout_dir))
-        os.makedirs(dataout_dir)
-    with open(OperationModesOut, 'w') as ModeFile:
+    # ASR- TODO: TN Review deletion of clode block to create: data-out/optn_mds.txt
+    # Check optn_mds change & update
+    f1 = OperationModes
+    f2 = os.path.splitext(OperationModes)[0] + "2.txt"
+    print("ASR-Probe::OperationModes_tmp= {0}..." .format(f2))
+    with open(f2, 'w') as ModeFile:
         ModeFile.write(str(ModeList))
+    fchk = filecmp.cmp(f1, f2)
+    if fchk == 0:
+        print("fchk= {0}; Unchanged OperationModes= {1}; ..." .format(fchk, OperationModes))
+        os.remove(f2)
+    else:
+        print("fchk= {0}; Updated OperationModes= {1}!!!" .format(fchk, OperationModes))
+        os.remove(f1)
+        os.rename(f2, f1)
+#    if not os.path.exists(OperationModesOut):
+#        dataout_dir=os.path.dirname(OperationModesOut)
+#        print("Creating dataout_dir= {0}" .format(dataout_dir))
+#        os.makedirs(dataout_dir)
+#    with open(OperationModesOut, 'w') as ModeFile:
+#        ModeFile.write(str(ModeList))
 
     ################################################
     # Residual Capacity dataframe- PWR techs & reduce dataframe linearly vs. cutoff at 2025
@@ -933,7 +1034,17 @@ def BuildCLEWsModel(data, yaml_file):
             RemainingYears = AgriculturalResidualCapacityRetirementYears - (year - min(YearsN))
             if RemainingYears > 0:
                 ResCap = cropagri_val * float(RemainingYears)/(float(AgriculturalResidualCapacityRetirementYears))
-                ResidCapList.append([Region, "LND" + cropagri_key, str(year), ResCap])
+                ResidCapList.append([Region, "LND" + cropagri_key, str(int(year)), ResCap])
+
+    ################################################
+    # Capital Cost dataframe for each PWR techs
+    for n in range(len(AgriculturalCapitalCost)):
+        print("ASR-Probe::AgriculturalCapitalCost[{0:1d}]= {1}..." .format(n, AgriculturalCapitalCost[n]))
+        for m in range(len(AgriculturalCapitalCost[n])):
+            print("ASR-Probe::AgriculturalCapitalCost[{0:1d}][{1:1d}]= {2}..." .format(n, m, AgriculturalCapitalCost[n][m]))
+        for year in YearsN:
+            CapitalCostList.append([Region, AgriculturalCapitalCost[n][0], str(int(year)), AgriculturalCapitalCost[n][1]])
+#TN - Jumped ahead - Sorry Ashok...
 
     ############################################
     # Remove any 0's from IAR and OAR #
@@ -958,8 +1069,8 @@ def BuildCLEWsModel(data, yaml_file):
         Updateotoole(SetNames, NewSetItems, IARList, OARList, otooleOutputDirectory)
 
     if OutputFormat == 'append_otoole':
-        Appendotoole(SetNames, NewSetItems, ResidCapList, IARList, OARList,
-                otooleOutputDirectory, OsemosysGlobalPath)
+        Appendotoole(SetNames, NewSetItems, ResidCapList, CapitalCostList, IARList, OARList,
+                otooleOutputDirectory, OsemosysGlobalPath, Debug)
 
 ################################################################################
 # Main function::Calls Build CLEWs Model
