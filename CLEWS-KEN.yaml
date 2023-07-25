@@ -1,0 +1,226 @@
+# clewsy build parameterization yaml file
+#   Variable definitions to update MoManI | Append/Update otoole models
+
+Acronym_dict: {
+  CCD: 'Country Code',
+  RGN: 'Region Code',
+  FLT: 'Filter Code',
+  IND: 'Industry',
+  RES: 'Residential',
+  COM: 'Commercial',
+  AGR: 'Agricultural',
+  TRA: 'Transport',
+  OTH: 'Other',
+  BIO: 'Biomass',
+  COA: 'Coal',
+  CRU: 'Crude oil',
+  DSL: 'Diesel',
+  ELC001: 'Electricity from power plants',
+  ELC002: 'Electricity from transmission',
+  ELCKENXX01: 'Electricity from power plants',
+  ELCKENXX02: 'Electricity from transmission',
+  GSL: 'Gasoline',
+  HFO: 'Heavy fuel oil',
+  NGS: 'Natural gas',
+  KER: 'Kerosene',
+  LPG: 'LPG',
+  OHC: 'Other hydrocarbons',
+  GEO: 'Geothermal',
+  HYD: 'Hydropower',
+  SOL: 'Solar',
+  WND: 'Wind',
+  CHC: 'Charcoal',
+  PCK: 'Petroleum coke',
+  JFL: 'Jet fuel',
+# Naming Convention for AgriculturalResidualCapacity
+  BEA: 'Bean',
+  MZE: 'Maize',
+  COW: 'Cowpea',
+  SOR: 'Sorghum',
+  PTS: 'Sweet Potato',
+  TEA: 'Tea',
+  HI:  'High intensity Irrigated',
+  IR:  'Intermediate intensity Rainfed',
+  II:  'Intermediate intensity Irrigated'
+}
+
+# Model external dependencies: Directories & Files
+################################################################
+Model: CLEWS-KEN
+Debug: 0             # ASR- Note: 1= Debug probes on; 0= No debug probes
+OutputFormat: append_otoole
+OperationModes: 'optn_mds.txt'
+otooleOutputDirectory: 'data-out'
+DataDirectoryName: './data-inp/gaezclstr-ken'
+OsemosysGlobalPath: './data-inp/osemosys-ken'
+ClusterBaseFileName: clustering_results_
+PrecipitationClusterBaseFileName: clustering_results_prc_
+EvapotranspirationClusterBaseFileName: clustering_results_evt_
+IrrigationWaterDeficitClusterBaseFileName: clustering_results_cwd_
+
+# Model Time Space parameters: Years, Land, Regions,... TimeSlices
+################################################################
+Years:
+  - 2020
+  - 2021
+  - 2022
+  - 2023
+  - 2024
+  - 2025
+  - 2026
+  - 2027
+  - 2028
+  - 2029
+  - 2030
+  - 2031
+  - 2032
+  - 2033
+  - 2034
+  - 2035
+
+LandRegions:
+  - TAI
+  - NCA
+  - NCB
+  - NCC
+  - NCD
+  - NCE
+
+LandToGridMap: {
+  NCA:  KENXX,
+  NCB:  KENXX,
+  NCC:  KENXX,
+  NCD:  KENXX,
+  NCE:  KENXX,
+  TAI:  KENXX,
+}
+
+LandUseCodes: {
+  BAR: Barren and sparsely vegetated land,
+  FOR: Forest land,
+  GRS: Grassland & woodland,
+  BLT: Built-up land,
+  WAT: Water bodies,
+  OTH: Other agricultural land  # Do we need this at all???
+}
+
+Regions: {GLOBAL: ['Global', '#000000']}
+
+Timeslices: { #data from osemosys_global
+  SEA1BAS: ['Season 1 baseload', '#000000'],
+  SEA1INT: ['Season 1 intermediate', '#cc9900'],
+  SEA1PEK: ['Season 1 peak', '#00cc66'],
+  SEA2BAS: ['Season 2 baseload', '#ffffcc'],
+  SEA2INT: ['Season 2 intermediate', '#99ff66'],
+  SEA2PEK: ['Season 2 peak', '#cc3333']
+}
+
+# Model Land, Water parameters: Irrigation type, Rainfed,...
+################################################################
+IntensityList: {
+  L: Low,
+  I: Intermediate,
+  H: High
+}
+
+IrrigationTypeList: {
+  R: Rain-fed,
+  I: Irrigation
+}
+
+EvapotranspirationPercentPRCOtherLandUse: {
+  # Percentages taken from Bolivia model by Abhi.
+  BAR: 0.773,
+  FOR: 0.691,
+  GRS: 0.694,  # Numbers from Bolivia.  SET is settled, or BLT.
+  BLT: 0.631,
+  WAT: 0.571,
+  OTH: 0.694   # Used GRS for OTH
+}
+
+GroundwaterPercentofExcessOtherLandUse: {
+  # Since other land types are more likely to have a different ratio.
+  BAR: 0.009,
+  FOR: 0.077,
+  GRS: 0.051,
+  BLT: 0.072,  # Numbers from water ratios from Bolivia.  SET is BLT.
+  WAT: 0.017,
+  OTH: 0.051   # Used GRS for OTH
+}
+
+# Precent of excess water (Irrigation + Precipitation - Evapotranspiration) that returns as groundwater.  Rest returns as Runoff.
+# GroundwaterPercentofExcess: Value for grassland. Need a better number...
+GroundwaterPercentofExcess: 0.051
+
+# Model Energy parameters: Fuels, Transformation Tech,...
+################################################################
+EndUseFuels: {
+  IND: ['COA', 'LPG', 'KER', 'DSL', 'HFO', 'OHC', 'BIO', 'NGS', 'ELCKENXX02'],
+  RES: ['LPG', 'KER', 'BIO', 'NGS', 'ELCKENXX02'],
+  COM: ['KER', 'DSL', 'LPG', 'BIO', 'NGS', 'ELCKENXX02'],
+  AGR: ['DSL', 'ELCKENXX02'],
+  TRA: ['GSL', 'KER', 'DSL', 'HFO', 'NGS', 'ELCKENXX02']
+}
+
+ImportFuels: [] # ['COA', 'CRU', 'LPG', 'GSL', 'KER', 'DSL', 'HFO']
+
+ExportFuels: [] # ['COA', 'NGS', 'CRU', 'GSL', 'KER', 'HFO', 'BIO']
+
+DomesticMining: [] # ['COA', 'NGS', 'CRU']
+
+DomesticRenewables: [] # ['WND', 'HYD', 'BIO', 'SOL', 'GEO']
+
+# Note:  Transformation technologies assume that their fuels are created elsewhere (either in the DomesticMining, DomesticRenewables or ImportFuels.
+TransformationTechnologies: [
+    ['PWRTRNX01', 'ELCKENXX01', '1.11', 'ELCKENXX02', '1', 'Power transmission', '1'],  # 90% efficient transmission system (losses)
+
+    # Structure of data is:  [Tech, InFuel, IAR, OutFuel, OAR, Name, Mode]
+    # If the FUEL is '' that piece will not be created.
+    # Name is used only the first time this technology shows up.  Fuels are created only if needed.
+    # If multiple lines for the same technology, this technology will have multiple input and output activity ratios.
+    # Note:  This section can also be used to add input or output fuels to various technologies (cooling water, for example)
+
+]
+
+# Power Plants: #Data from osemosys_global
+PowerPlants: {
+}
+
+Emissions: {
+  CO2: ['Carbon dioxide emissions.', '#000000']}
+
+# Model Agriculture & Crop yield  parameters:
+################################################################
+# AgriculturalResidualCapacityRetirementYears
+AgriculturalResidualCapacityRetirementYears: 15
+
+CropYieldFactors: { #keep, change names to match clustering
+    COW: 1,
+    BEA: 1,
+    SOR: 1,
+    MZE: 1,
+    TEA: 1,
+    PTS: 1
+}
+
+AgriculturalResidualCapacity: {
+}
+
+AgriculturalCapitalCost: [
+]
+
+# AgriculturalVariableCost: {
+#    RAPHIBC:  5,
+#    ...
+#    OTHIIBC:  5,
+#    OTHIRBC:  6
+# }
+#
+# AgriculturalOperationalLife: {
+#    RAPHIBC:  5,
+#    ...
+#    OTHIIBC:  5,
+#    OTHIRBC:  6
+# }
+
+

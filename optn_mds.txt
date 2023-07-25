@@ -1,0 +1,1 @@
+['COWHI', 'COWHR', 'MZEHR', 'PTSHR', 'TEAHR', 'MZEHI', 'BEAHI', 'TEAHI', 'SORHI', 'BEAHR', 'PTSHI', 'SORHR', 'Barren and sparsely vegetated land', 'Built-up land', 'Forest land', 'Grassland & woodland', 'Other agricultural land', 'Water bodies']

@@ -1,28 +1,80 @@
-""" Creates the SETS, FUELS and COMMODITIES in MoManI for the energy sector and the land use (from clustered AEZ data).
+""" Generlized clewsy: python script::
+
+    Country Code 3 letters  == <ccd>
+    Region Code 3 letters   == <rgn>
+    Filter Code 3 letters   == <flt, rgn, ccd>
+
+    Workflow:
+        1- Input Data set preparation:
+            [geofilter|canada + remove other technologies] >> 'osemosys_global' >>
+                [./data-inp/osemosys-<ccd>/\*.csv]
+            GAEZ[Land & Water Database] >> Clustering scripts >> [./data-inp/gaezclstr-<ccd>/\*.csv]
+
+        2- clewsy:
+            [./data-inp/gaezclstr-<ccd>/\*.csv + <clewsy parametrization file == CLEWS-CCD.yaml> +
+            ./data-inp/osemosys-<ccd>/\*.csv] >>
+            python src/build/build.py >>
+                ./data-out/gaezclstr-<ccd>/\*.csv
+        Supported OutputFormat == MoManI; otoole::Update; otoole::Append
 
 This script (C) Taco Niet 2019-2020
-
 """
 
-def Fill_Set(new_set_items, set_names, sets, value1, color1, name1 = '', t = "name"):
-    new_set_items[set_names.index(sets)].append(\
-    {"value": value1, t: name1, "color": color1})
-
-
-# create_set in BuildCLEWsModel.py
+################################################################################
+# Function to Create Set data::Called in BuildCLEWsModel()
+################################################################
 def create_set(set_names, new_SetItems, new_setGroups, sets):
     set_names.append(sets)
     new_SetItems.append([])
-    new_setGroups.append([])    
-        
-# func1 in BuildCLEWsModel.py
-def AddActivityListItems(year1, region, input1, input2, List, value = None, g = "1", v = "1"):    
+    new_setGroups.append([])
+
+################################################################################
+# Function to Add Activity List Items::Called in BuildCLEWsModel()
+################################################################
+def AddActivityListItems(year1, region, input1, input2, List, value = None, g = "1", v = "1"):
     for year in year1:
         Sets = [region, input1, input2, g, year]
         Value = value
         Item = {"c": Sets, "v": v}
         List.append(Item)
 
+################################################################################
+# Function to Fill Set data elements
+################################################################
+def Fill_Set(new_set_items, set_names, sets, value1, color1, name1 = '', t = "name"):
+    new_set_items[set_names.index(sets)].append(\
+    {"value": value1, t: name1, "color": color1})
+
+################################################################################
+# Function to convert year to integer
+################################################################
+def convert_dtyp(tmp_file, wrk_file, list_idx):
+    import os
+    import csv
+    with open(tmp_file, 'w') as fout:
+        with open(wrk_file,'r') as fin:
+            writer = csv.writer(fout)
+            reader = csv.reader(fin)
+            row_cnt = 0
+            for row in reader:
+                if row_cnt == 0:
+#                    print("csv header= {0}" .format(row))
+                    writer.writerow(row)
+                    row_cnt = row_cnt + 1
+                else:
+#                   print("row= {0}; row[list_idx]==year= {1}; int(year)= int(row[list_idx])= {2}"
+#                            .format(row, row[list_idx], int(float(row[list_idx]))))
+                    int_year = int(float(row[list_idx]))
+                    row[list_idx] = int_year
+                    writer.writerow(row)
+    print("Removing Original file= {0}; Renaming updated file= {1}..."
+            .format(wrk_file, tmp_file))
+    os.remove(wrk_file)
+    os.rename(tmp_file, wrk_file)
+
+################################################################################
+# Function to OUTPUT TO OTOOLE FORMAT
+################################################################
 def Updateotoole(SetNames, NewSetItems, IARList, OARList, otooleOutputDirectory):
     import os
     if not os.path.exists(otooleOutputDirectory):
@@ -33,7 +85,7 @@ def Updateotoole(SetNames, NewSetItems, IARList, OARList, otooleOutputDirectory)
             f.write('VALUE\n')
             for items in NewSetItems[SetNames.index(SetName)]:
                 f.write(items['value']+'\n')
-    
+
     # And output the IAR for otoole:
     with open(os.path.join(otooleOutputDirectory, 'InputActivityRatio.csv'),'w') as f:
         f.write('REGION,TECHNOLOGY,FUEL,MODE_OF_OPERATION,YEAR,VALUE\n')
@@ -46,6 +98,151 @@ def Updateotoole(SetNames, NewSetItems, IARList, OARList, otooleOutputDirectory)
         for item in OARList:
             f.write(str(item['c'][0])+','+str(item['c'][1])+','+str(item['c'][2])+','+str(item['c'][3])+','+str(item['c'][4])+','+str(item['v'])+'\n')
 
+################################################################################
+# Function to APPEND OTOOLE OUTPUT DATA
+################################################################
+def Appendotoole(SetNames, NewSetItems, ResidCapList, CapitalCostList, IARList, OARList,
+        otooleOutputDirectory, OsemosysGlobalPath, Debug):
+    import os
+    import shutil
+    import csv
+    import decimal
+
+    if not os.path.exists(otooleOutputDirectory):
+        os.makedirs(otooleOutputDirectory)
+
+    # Ouptut the sets for otoole:
+    for SetName in SetNames:
+        print("ASR-Probe::SetName= {0}..." .format(SetName))
+        with open(os.path.join(otooleOutputDirectory, SetName + '.csv'),'w') as fout:
+            with open(os.path.join(OsemosysGlobalPath, SetName + '.csv'), 'r') as fin:
+                if SetName == 'MODE_OF_OPERATION':
+                    fout.write("VALUE\n")
+                    for items in NewSetItems[SetNames.index(SetName)]:
+                        fout.write(items['value']+'\n')
+                # Scan OsemosysGlobalPath/SetName.csv::Avoid redundancy:
+                #   value= NewSetItems[SetNames.index(SetName)::items[value]
+                elif SetName == 'EMISSION':
+                    print("ASR-Probe::NewSetItems[SetNames.index(SetName)]= {0}"
+                            .format(NewSetItems[SetNames.index(SetName)]))
+                    fout.write("VALUE\n")
+                    for items in NewSetItems[SetNames.index(SetName)]:
+                        print("\titems= {0}; items['value']= {1}"
+                                .format(items, items['value']))
+                        list_idx = 0
+                        reader = csv.reader(fin)
+                        row_cnt = 0
+                        for row in reader:
+                            if row_cnt == 0:
+                                row_cnt = row_cnt + 1
+                            else:
+                               value = row[list_idx]
+                               if items['value'] == value:
+                                   print("\trow= {0}; row[list_idx]==value = {1}" .format(row, value))
+                                   fout.write(items['value']+'\n')
+                               else:
+                                   fout.write(value)
+                # Have to treat both TECHNOLOGY and MODEOFOPERATION differently since clewsy has the full list
+                elif SetName == 'TECHNOLOGY':
+                    fout.write("VALUE\n")
+                    for items in NewSetItems[SetNames.index(SetName)]:
+                        fout.write(items['value']+'\n')
+                # And COMMODITY as well...
+                elif SetName == 'COMMODITY':
+                    fout.write("VALUE\n")
+                    for items in NewSetItems[SetNames.index(SetName)]:
+                        fout.write(items['value']+'\n')
+                else:
+                    fout.write(fin.read())
+                    for items in NewSetItems[SetNames.index(SetName)]:
+                        fout.write(items['value']+'\n')
+
+    # Appendotoole::append ResidCapList[]::
+    #   ~/data-in/ResidualCapacity.csv append(ResidCapList[]) >> ~/data-out/ResidualCapacity.csv
+    # Output the ResidualCapacity for otoole:
+    shutil.copy(os.path.join(OsemosysGlobalPath, 'ResidualCapacity.csv'),
+            os.path.join(otooleOutputDirectory, 'ResidualCapacity.csv'))
+    with open(os.path.join(otooleOutputDirectory, 'ResidualCapacity.csv'),'a') as fout:
+        for n in range(len(ResidCapList)):
+            ResidCapLstItmStr = str(ResidCapList[n])
+            ResidCapLstItm = ResidCapLstItmStr.replace("'", "")
+            ResidCapLstItm = ResidCapLstItm.replace("[", "")
+            ResidCapLstItm = ResidCapLstItm.replace("]", '\n')
+            ResidCapLstItm = ResidCapLstItm.replace(" ", "")
+            fout.write(ResidCapLstItm)
+
+    # Appendotoole::append CapitalCostList[]::
+    #TN I DID NOT UPDATE REST OF COMMENT YET   ~/data-in/ResidualCapacity.csv append(ResidCapList[]) >> ~/data-out/ResidualCapacity.csv
+    # Output the ResidualCapacity for otoole:
+    shutil.copy(os.path.join(OsemosysGlobalPath, 'CapitalCost.csv'),
+            os.path.join(otooleOutputDirectory, 'CapitalCost.csv'))
+    with open(os.path.join(otooleOutputDirectory, 'CapitalCost.csv'),'a') as fout:
+        for n in range(len(CapitalCostList)):
+            CapitalCostLstItmStr = str(CapitalCostList[n])
+            CapitalCostLstItm = CapitalCostLstItmStr.replace("'", "")
+            CapitalCostLstItm = CapitalCostLstItm.replace("[", "")
+            CapitalCostLstItm = CapitalCostLstItm.replace("]", '\n')
+            CapitalCostLstItm = CapitalCostLstItm.replace(" ", "")
+            fout.write(CapitalCostLstItm)
+
+    # Output the IAR for otoole:
+    #appnd IARList items to otoole output file
+    with open(os.path.join(otooleOutputDirectory, 'InputActivityRatio.csv'),'w') as fout:
+        with open(os.path.join(OsemosysGlobalPath, 'InputActivityRatio.csv'), 'r') as fin:
+            fout.write(fin.read())
+            for item in IARList:
+                fout.write(str(item['c'][0])+','+str(item['c'][1])+','+str(item['c'][2])+','+str(item['c'][3])+','+str(item['c'][4])+','+str(item['v'])+'\n')
+
+    # Output the OAR for otoole:
+    with open(os.path.join(otooleOutputDirectory, 'OutputActivityRatio.csv'),'w') as fout:
+        with open(os.path.join(OsemosysGlobalPath, 'OutputActivityRatio.csv'), 'r') as fin:
+            fout.write(fin.read())
+            for item in OARList:
+                fout.write(str(item['c'][0])+','+str(item['c'][1])+','+str(item['c'][2])+','+str(item['c'][3])+','+str(item['c'][4])+','+str(item['v'])+'\n')
+
+    # Copy remaining files in OsemosysGlobalPath >> otooleOutputDirectory
+    for file in os.listdir(OsemosysGlobalPath):
+        if not os.path.exists(os.path.join(otooleOutputDirectory, file)):
+            if Debug == 1:
+                print("ASR-Probe::file= {0} >> otooleOutputDirectory ={1}" .format(file, otooleOutputDirectory))
+            shutil.copyfile(os.path.join(OsemosysGlobalPath, file), os.path.join(otooleOutputDirectory, file))
+
+    # Align files @ otooleOutputDirectory
+    if 'COMMODITY.csv' in os.listdir(otooleOutputDirectory):
+        os.rename(os.path.join(otooleOutputDirectory, 'COMMODITY.csv'), os.path.join(otooleOutputDirectory, 'FUEL.csv'))
+    else:
+        pass
+    with open(os.path.join(otooleOutputDirectory, 'CapacityToActivityUnit.csv'),'w') as fout:
+        with open(os.path.join(otooleOutputDirectory, 'TECHNOLOGY.csv'),'r') as fin:
+            fout.write('REGION,TECHNOLOGY,VALUE\n')
+            for technology in fin:
+                if technology.startswith('PWR'):
+                    fout.write('GLOBAL,'+technology[:-1]+',31.536\n')
+
+    # ASR- Note: Fix for non-integer year
+    tmp_file = os.path.join(otooleOutputDirectory, 'CapitalCost_v1.csv')
+    wrk_file = os.path.join(otooleOutputDirectory, 'CapitalCost.csv')
+    list_idx = 2
+    convert_dtyp(tmp_file, wrk_file, list_idx)
+
+    tmp_file = os.path.join(otooleOutputDirectory, 'FixedCost_v1.csv')
+    wrk_file = os.path.join(otooleOutputDirectory, 'FixedCost.csv')
+    list_idx = 2
+    convert_dtyp(tmp_file, wrk_file, list_idx)
+
+    tmp_file = os.path.join(otooleOutputDirectory, 'OutputActivityRatio_v1.csv')
+    wrk_file = os.path.join(otooleOutputDirectory, 'OutputActivityRatio.csv')
+    list_idx = 3
+    convert_dtyp(tmp_file, wrk_file, list_idx)
+
+    tmp_file = os.path.join(otooleOutputDirectory, 'OutputActivityRatio_v1.csv')
+    wrk_file = os.path.join(otooleOutputDirectory, 'OutputActivityRatio.csv')
+    list_idx = 4
+    convert_dtyp(tmp_file, wrk_file, list_idx)
+
+################################################################################
+# Function to UPDATE MOMANI WITH NEW DATA
+################################################################
 def UpdateMoManI(Model, SetNames, NewSetItems, NewSetGroups, IARList, OARList):
     import sys
     import pymongo
@@ -72,7 +269,6 @@ def UpdateMoManI(Model, SetNames, NewSetItems, NewSetGroups, IARList, OARList):
     NumberofScenarios = db.Scenario.count_documents({"modelId": Model_id})
 
     # NumberofScenarios = Scenarios.count()
-
     if NumberofScenarios > 1:
         print("These are multiple scenarios in the MoManI database for", Model + ":")
         print("  Number Name                 Description                    Revision")
@@ -209,97 +405,171 @@ def UpdateMoManI(Model, SetNames, NewSetItems, NewSetGroups, IARList, OARList):
         db.ParameterDataItemBundle.insert_one(set)
         print("OutputActivityRatio group", count, "uploaded for", Model, "model with", len(itemBundle), "items.")
 
-
-def BuildCLEWsModel(data):
+################################################################################
+# Function to Build CLEWs Model
+################################################################
+def BuildCLEWsModel(data, yaml_file):
     import sys
     import os
-    
+    import filecmp
+
     import colorama
     import decimal
     import collections
     colorama.init()
-    
+
     # create a decimal context
     ctx = decimal.Context()
     # Set to 4 Sig Figs for MoManI speed
     ctx.prec = 2
-    # Unpacking variables
+    # Unpacking yaml parameters
+    # Model external dependencies: Directories & Files
     Model = data['Model']
+    Debug = data['Debug']
     OutputFormat = data['OutputFormat']
+    OperationModes = data['OperationModes']
     otooleOutputDirectory = data['otooleOutputDirectory']
-    Years = [str(i) for i in data['Years']]
-    Emissions = data['Emissions']
-    Timeslices = data['Timeslices']
-    Regions = data['Regions']
-    EndUseFuels = data['EndUseFuels']
-    PowerPlants = data['PowerPlants']
-    LandToGridMap = data['LandToGridMap']
-    TransformationTechnologies = data['TransformationTechnologies']
-    ImportFuels = data['ImportFuels']
-    DomesticMining = data['DomesticMining']
-    DomesticRenewables = data['DomesticRenewables']
-    ExportFuels = data['ExportFuels']
-    LandRegions = data['LandRegions']
     DataDirectoryName = data['DataDirectoryName']
+    OsemosysGlobalPath = data['OsemosysGlobalPath']
     ClusterBaseFileName = data['ClusterBaseFileName']
     PrecipitationClusterBaseFileName = data['PrecipitationClusterBaseFileName']
     EvapotranspirationClusterBaseFileName = data['EvapotranspirationClusterBaseFileName']
     IrrigationWaterDeficitClusterBaseFileName = data['IrrigationWaterDeficitClusterBaseFileName']
-    IrrigationTypeList = data['IrrigationTypeList']
-    IntensityList = data['IntensityList']
-    CropYieldFactors = data['CropYieldFactors']
-    GroundwaterPercentofExcess = data['GroundwaterPercentofExcess']
+
+    # Model Time Space parameters: Years, Land, Regions,... TimeSlices
+    YearsN = data['Years']
+    Years = [str(i) for i in data['Years']]
+    LandRegions = data['LandRegions']
+    LandToGridMap = data['LandToGridMap']
     LandUseCodes = data['LandUseCodes']
-    # Sort land use codes so it makes the visualization script more effective
+    # Sort land use codes to make visualization script effective
+    # ASR- TODO: Converge w/ Taco need for collections.OrderedDict...)
     LandUseCodes = collections.OrderedDict(sorted(LandUseCodes.items()))
-    
+    Regions = data['Regions']
+    Timeslices = data['Timeslices']
+
+    # Model Land, Water parameters: Irrigation type, Rainfed,...
+    IntensityList = data['IntensityList']
+    IrrigationTypeList = data['IrrigationTypeList']
     EvapotranspirationPercentPRCOtherLandUse = data['EvapotranspirationPercentPRCOtherLandUse']
     GroundwaterPercentofExcessOtherLandUse = data['GroundwaterPercentofExcessOtherLandUse']
+    GroundwaterPercentofExcess = data['GroundwaterPercentofExcess']
 
-    # ***************************** #
-    # CREATE ENERGY SET INFORMATION #
-    # ***************************** #
+    # Model Energy parameters: Fuels, Transformation Tech,...
+    EndUseFuels = data['EndUseFuels']
+    ImportFuels = data['ImportFuels']
+    ExportFuels = data['ExportFuels']
+    DomesticMining = data['DomesticMining']
+    DomesticRenewables = data['DomesticRenewables']
+    TransformationTechnologies = data['TransformationTechnologies']
+    PowerPlants = data['PowerPlants']
+    Emissions = data['Emissions']
 
+    # Model Agriculture & Crop yield  parameters:
+    AgriculturalResidualCapacityRetirementYears = data['AgriculturalResidualCapacityRetirementYears']
+    CropYieldFactors = data['CropYieldFactors']
+    # ASR- Note: AgriculturalResidualCapacity{key:value,... ] == dictionary
+    AgriculturalResidualCapacity = data['AgriculturalResidualCapacity']
+    # ASR- Note: List::SAgriculturalResidualCapacity[] == sorted list of  AgriculturalResidualCapacity[key,... ]
+    SAgriculturalResidualCapacity = sorted(data['AgriculturalResidualCapacity'])
+    # ASR- Note: AgriculturalCapitalCost == list of Capital cost for each technology
+    AgriculturalCapitalCost = data['AgriculturalCapitalCost']
+
+    print("BuildCLEWsModel w/: yaml file= {0}::"
+        "\n\tModel= {1}; Debug= {2}; OutputFormat= {3};"
+        "\n\tOperationModes= {4}; otooleOutputDirectory= {5}"
+        "\n\tDataDirectoryName= {6}; OsemosysGlobalPath= {7}"
+        "\n\tClusterBaseFileName= {8}; PrecipitationClusterBaseFileName= {9}"
+        "\n\tEvapotranspirationClusterBaseFileName= {10}; IrrigationWaterDeficitClusterBaseFileName= {11}"
+            .format(yaml_file, Model, Debug, OutputFormat, OperationModes, otooleOutputDirectory,
+            DataDirectoryName, OsemosysGlobalPath, ClusterBaseFileName, PrecipitationClusterBaseFileName,
+            EvapotranspirationClusterBaseFileName, IrrigationWaterDeficitClusterBaseFileName))
+    print("--------------------------------\n")
+    user_inp = raw_input("BuildCLEWsModel parameters OK? (<Y=Yes>/*=No)")
+    if user_inp != "Y":
+        sys.exit("Please correct BuildCLEWsModel parameters & re-run... Exiting!!!")
+
+    ################################################
+    # CREATE ENERGY SET INFORMATION
+    ################################################
     # Create empty list for new sets
     SetNames = []
     NewSetItems = []
     NewSetGroups = []
     IARList = []
     OARList = []
+    ResidCapList = []
+    CapitalCostList = []
 
+    if OutputFormat != 'append_otoole':
+        # Create set YEARS
+        # First create the new set name for year and add space for groups and items for this set
+        create_set(SetNames, NewSetItems, NewSetGroups, 'YEAR')
+        for year in Years:
+            # Note: Cannot use the same function as other sets
+            #   YEAR does not have a 'name' field. MoManI crashes!!!
+            NewSetItems[SetNames.index('YEAR')].append({'value': year, 'color': '#000000'})
 
-
-    # Create set YEARS
-    # First create the new set name for year and add space for groups and items for this set
-    create_set(SetNames, NewSetItems, NewSetGroups, 'YEAR')
-    for year in Years:
-        # Cannot use the same function as other sets as YEAR does not have a 'name' field and this crashes MoManI...
-        NewSetItems[SetNames.index('YEAR')].append({'value': year, 'color': '#000000'})
-       
     # Create set EMISSIONS
     # First create the new set name for year and add space for groups and items for this set
     create_set(SetNames, NewSetItems, NewSetGroups, 'EMISSION')
+    for n in range(len(SetNames)):
+        print("SetNames[{0:1d}]= {1}" .format(n, SetNames[n]))
+
+    for n in range(len(NewSetItems)):
+        print("NewSetItems[{0:1d}]= {1}" .format(n, NewSetItems[n]))
+
+    for n in range(len(NewSetGroups)):
+        print("NewSetGroups[{0:1d}]= {1}" .format(n, NewSetGroups[n]))
+
     for emission in Emissions:
         Fill_Set(NewSetItems, SetNames, "EMISSION", emission, Emissions[emission][1], Emissions[emission][0])
+    for n in range(len(SetNames)):
+        print("ASR-Probe::Filled Set {0}..." .format(SetNames[n]))
+        for m in range(len(NewSetItems)):
+            print("SetNames[{0:1d}]= {x}::NewSetItems[{1:1d}]= {y}"
+                    .format(n, m, x=SetNames[n], y=NewSetItems[m]))
+            print("\tidx_val= {0}; Emissions[]= {1} {2}"
+                    .format(emission, Emissions[emission][1], Emissions[emission][0]))
+        print("--------------------------------\n")
 
-    # Create set TIMESLICE
-    # First create the new set name for year and add space for groups and items for this set
-    create_set(SetNames, NewSetItems, NewSetGroups, 'TIMESLICE')
-    for timeslice in Timeslices:
-        Fill_Set(NewSetItems, SetNames, "TIMESLICE", timeslice, Timeslices[timeslice][1], Timeslices[timeslice][0])
+    if OutputFormat != 'append_otoole':
+        # Create set TIMESLICE
+        # First create the new set name for year and add space for groups and items for this set
+        create_set(SetNames, NewSetItems, NewSetGroups, 'TIMESLICE')
+        for timeslice in Timeslices:
+            Fill_Set(NewSetItems, SetNames, "TIMESLICE",
+                    timeslice, Timeslices[timeslice][1], Timeslices[timeslice][0])
 
     # Create set REGION
     # First create the new set name for year and add space for groups and items for this set
     create_set(SetNames, NewSetItems, NewSetGroups, 'REGION')
     for Region in Regions:
-        Fill_Set(NewSetItems, SetNames, "REGION", Region, Regions[Region][1], Regions[Region][0])
+        print("ASR-Probe::Region {0}..." .format(Region))
+        if OutputFormat != 'append_otoole':
+            Fill_Set(NewSetItems, SetNames, "REGION", Region, Regions[Region][1], Regions[Region][0])
 
     # Create empty set TECHNOLOGY
     create_set(SetNames, NewSetItems, NewSetGroups, 'TECHNOLOGY')
+    # And fill it with the existing techs from OSeMOSYS Global if we're appending.
+    if OutputFormat == 'append_otoole':
+        with open(os.path.join(OsemosysGlobalPath, 'TECHNOLOGY.csv'), 'r') as techsin:
+            for tech in techsin:
+                if tech.strip() != "VALUE":  # Need this if to make sure we don't load in the header.
+                    Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", tech.strip(), "", "")
+    # Once we've done this we need to treat TECHNOLOGY differently in the output section otherwise
+    # everything will be duplicated.
 
     # Create empty set COMMODITY
     create_set(SetNames, NewSetItems, NewSetGroups, 'COMMODITY')
-
+    # And fill with existing commodities from OSeMOSYS Global.
+    if OutputFormat == 'append_otoole':
+        with open(os.path.join(OsemosysGlobalPath, 'COMMODITY.csv'), 'r') as commsin:
+            for comm in commsin:
+                if comm.strip() != "VALUE":  # Need this if to make sure we don't load in the header
+                    Fill_Set(NewSetItems, SetNames, "COMMODITY", comm.strip(), "", "")
+    # Once we've done this we need to treat TECHNOLOGY differently in the output section otherwise
+    # everything will be duplicated.
 
     # Create sectoral demand technologies
     for sector in EndUseFuels:
@@ -307,15 +577,19 @@ def BuildCLEWsModel(data):
             # Create the demand fuel:
             Fill_Set(NewSetItems, SetNames, "COMMODITY", sector + fuel, "#000000", "")
             # Create the demand technology
-            Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", "DEM" + sector + fuel, "#000000", "Demand technology for ")
+            Fill_Set(NewSetItems, SetNames, "TECHNOLOGY",
+                    "DEM" + sector + fuel, "#000000", "Demand technology for ")
             # Create the input fuel (if it doesn't exist)
             if not fuel in [li['value'] for li in NewSetItems[SetNames.index("COMMODITY")]]:
-                Fill_Set(NewSetItems, SetNames, "COMMODITY", fuel, "#000000", "")
+                if OutputFormat == 'append_otoole':
+                    if not fuel[0:3] == "ELC":
+                        Fill_Set(NewSetItems, SetNames, "COMMODITY", fuel, "#000000", "")
+                else:
+                    Fill_Set(NewSetItems, SetNames, "COMMODITY", fuel, "#000000", "")
 
             # Create the input and output activity for that combination:
             AddActivityListItems(Years, Region, "DEM" + sector + fuel, sector + fuel, OARList, value = "1")
             AddActivityListItems(Years, Region, "DEM" + sector + fuel, fuel, IARList, value = "1")
-
 
     for powerplant in PowerPlants:
         if not powerplant[3:6] in [li['value'] for li in NewSetItems[SetNames.index("COMMODITY")]]:
@@ -338,7 +612,6 @@ def BuildCLEWsModel(data):
         AddActivityListItems(Years, Region, powerplant, "ELC" + powerplant[6:7] + "01", OARList, value = "1")
 
         # Create input surface water.
-
         LandRegion = [k for k, v in LandToGridMap.items() if v == powerplant[6:7]][0]
         if not "DEMPWRSUR" + LandRegion in [li['value'] for li in NewSetItems[SetNames.index("TECHNOLOGY")]]:
             Fill_Set(NewSetItems, SetNames, "TECHNOLOGY","DEMPWRSUR" + LandRegion,
@@ -349,7 +622,6 @@ def BuildCLEWsModel(data):
 
             AddActivityListItems(Years, Region, "DEMPWRSUR" + LandRegion, "WTRSUR" + LandRegion, IARList, value = "1")
             AddActivityListItems(Years, Region, "DEMPWRSUR" + LandRegion, "PWRWAT" + LandRegion, OARList, value = "1")
-
 
         AddActivityListItems(Years, Region, powerplant, "PWRWAT" + LandRegion, IARList, value = str(PowerPlants[powerplant][2]),
                 v = str(PowerPlants[powerplant][2]))
@@ -399,21 +671,17 @@ def BuildCLEWsModel(data):
         Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", "EXP" + fuel, "#000000",  "")
         AddActivityListItems(Years, Region, "EXP" + fuel, fuel, IARList, value = "1")
 
-
-    # ******************************************** #
-    # AGRICULTURAL TECHNOLOGIES, FUELS AND IAR/OAR #
-    # ******************************************** #
-
+    ################################################
+    # AGRICULTURAL TECHNOLOGIES, FUELS AND Input Activity Ratio (IAR)/Output Activity Ratio (OAR)
+    ################################################
     # Create groups for sets to track commodities, technologies
     # Don't need groups for these for agriculture - can add later if needed...
     # Make all set colour black for the time being - can change later if needed...
-
     CropList = {}
     CropNumber = 1
     CropComboList = {}
     ModeList = []
     ModeNumber = 1
-
 
     Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", "MINLND" + "TOT", "#000000", "Land suuply technology.")
     Fill_Set(NewSetItems, SetNames, "COMMODITY", "L" + "TOT", "#000000", "Land resource.")
@@ -455,7 +723,6 @@ def BuildCLEWsModel(data):
         AddActivityListItems(Years, Region, "DEMAGRSUR" + LandRegion, "WTRSUR" + LandRegion, IARList, value = "1")
         AddActivityListItems(Years, Region, "DEMAGRSUR" + LandRegion, "AGRWAT" + LandRegion, OARList, value = "1")
 
-
         # Creation of public water supply from surface water
         # for year in Years:
         # Sets = [Region, "DEMPUBSUR"+LandRegion, "COMELC"+LandToGridMap[LandRegion], "1", year]
@@ -480,8 +747,7 @@ def BuildCLEWsModel(data):
         # IARList.append(Item)
         AddActivityListItems(Years, Region, "DEMPUBGWT" + LandRegion, "PUBWAT" + LandRegion, OARList, value = "1")
 
-
-        ###############################
+        ############################################
         # Precipitation sources
         Fill_Set(NewSetItems, SetNames, "TECHNOLOGY", "MINPRC" + LandRegion, "#000000", "Agricultural groundwater supply.")
         Fill_Set(NewSetItems, SetNames, "COMMODITY", "WTRPRC" + LandRegion, "#000000", "Agricultural water for irrigation.")
@@ -519,6 +785,7 @@ def BuildCLEWsModel(data):
                                           'r').readlines()
         IrrigationWaterDeficitClusters = open(
             os.path.join(DataDirectoryName, IrrigationWaterDeficitClusterBaseFileName + LandRegion + '.csv'), 'r').readlines()
+
         # Create list of crops (or add crops to list), intensities, technology
         for Combo in Clusters[0].split(",")[10:]:
             Crop = ' '.join(Combo.split(' ')[:-2])
@@ -651,22 +918,20 @@ def BuildCLEWsModel(data):
 
                 AddActivityListItems(Years, Region, "LND" + LandUseCode + "TOT", "L" + LandUseCode + "TOT", OARList, value = "1")
 
-            for line in Clusters[1:]:  # Have to have the output for all lines...
+            # AddActivityListItems for each ClusterBaseFileName + LandRegion + '.csv'
+            for clustercount in range(1, len(Clusters)):
                 # LSOU becomes LNDFORSOU, etc. in specified mode
-                AddActivityListItems(Years, Region, "LNDAGR" + LandRegion + "C" + line.split(',')[0].zfill(2),
+                AddActivityListItems(Years, Region, "LNDAGR" + LandRegion + "C" + Clusters[clustercount].split(',')[0].zfill(2),
                 "L" + LandUseCode + "TOT", IARList, value = "1", g = str(ModeNum + 1)) # print(Sets)
 
-
                 # Now add precipitation and water balance inputs and outputs
-                PrecipitationValue = float(PrecipitationClusters[int(line.split(',')[0])].split(',')[
-                                               1])  # Precipitation values are constant across all technologies/crops in a region.
+                PrecipitationValue = float(PrecipitationClusters[clustercount].split(",")[1])
+                # Precipitation values are constant across all technologies/crops in a region.
                 PrecipitationValue = format(ctx.create_decimal(repr(PrecipitationValue)), 'f')
 
                 AddActivityListItems(Years, Region,
-                        "LNDAGR" + LandRegion + "C" + line.split(',')[0].zfill(2),
+                        "LNDAGR" + LandRegion + "C" + Clusters[clustercount].split(',')[0].zfill(2),
                         "WTRPRC" + LandRegion, IARList, g = str(ModeNum + 1), v = str(PrecipitationValue))
-
-
 
                 # IAR for Irrigation doesn't exist - there is no irrigation for these technologies as they are not agricultural.
                 # OAR for Evapotranspiration
@@ -676,7 +941,7 @@ def BuildCLEWsModel(data):
                 # print(str(mode)+" "+modeCombo+ " "+CropCode2+ " "+cropcombo2)
 
                 AddActivityListItems(Years, Region,
-                        "LNDAGR" + LandRegion + "C" + line.split(',')[0].zfill(2),
+                        "LNDAGR" + LandRegion + "C" + Clusters[clustercount].split(',')[0].zfill(2),
                         "WTREVT" + LandRegion, OARList, g = str(ModeNum + 1), v = str(EvapotranspirationValue))
 
                 # OAR for Groundwater
@@ -688,12 +953,12 @@ def BuildCLEWsModel(data):
                 RunoffValue = format(ctx.create_decimal(repr(RunoffValue)), 'f')
 
                 AddActivityListItems(Years, Region,
-                        "LNDAGR" + LandRegion + "C" + line.split(',')[0].zfill(2),
+                        "LNDAGR" + LandRegion + "C" + Clusters[clustercount].split(',')[0].zfill(2),
                         "WTRGRC" + LandRegion, OARList, g = str(ModeNum + 1), v = str(GroundwaterValue))
 
                 # OAR for Runoff
                 AddActivityListItems(Years, Region,
-                        "LNDAGR" + LandRegion + "C" + line.split(',')[0].zfill(2),
+                        "LNDAGR" + LandRegion + "C" + Clusters[clustercount].split(',')[0].zfill(2),
                         "WTRSUR" + LandRegion, OARList, g = str(ModeNum + 1), v = str(RunoffValue))
 
     # Add in the transformation technologies
@@ -702,7 +967,7 @@ def BuildCLEWsModel(data):
         if not transformationtech[0] in [li['value'] for li in NewSetItems[SetNames.index("TECHNOLOGY")]]:
             NewSetItems[SetNames.index("TECHNOLOGY")].append(
                 {"value": transformationtech[0], "name": transformationtech[5], "color": "#000000"})
-       
+
         # Create the fuel and the IAR (if there is one specified)
         if transformationtech[1] != '':
             # Create the fuel if it doesn't already exist
@@ -730,24 +995,59 @@ def BuildCLEWsModel(data):
             AddActivityListItems(Years, Region, transformationtech[0], transformationtech[3], OARList, value = str(transformationtech[4]),
                 g = transformationtech[6], v = str(transformationtech[4]))
 
-
-    # ************************* #
-    # CREATE MODES OF OPERATION #
-    # ************************* #
-
+    ################################################
+    # ADD MODES OF OPERATION
     SetNames.append("MODE_OF_OPERATION")
     NewSetItems.append([])
     NewSetGroups.append([])
+    print("ASR-Probe::Regenerating MODE_OF_OPERATION @{0}" .format(OperationModes))
     for index, Mode in enumerate(ModeList):
         Fill_Set(NewSetItems, SetNames, "MODE_OF_OPERATION", str(index + 1), "#000000", Mode)
-
-    with open('ModeList.txt', 'w') as ModeFile:
+    # ASR- TODO: TN Review deletion of clode block to create: data-out/optn_mds.txt
+    # Check optn_mds change & update
+    f1 = OperationModes
+    f2 = os.path.splitext(OperationModes)[0] + "2.txt"
+    print("ASR-Probe::OperationModes_tmp= {0}..." .format(f2))
+    with open(f2, 'w') as ModeFile:
         ModeFile.write(str(ModeList))
+    fchk = filecmp.cmp(f1, f2)
+    if fchk == 0:
+        print("fchk= {0}; Unchanged OperationModes= {1}; ..." .format(fchk, OperationModes))
+        os.remove(f2)
+    else:
+        print("fchk= {0}; Updated OperationModes= {1}!!!" .format(fchk, OperationModes))
+        os.remove(f1)
+        os.rename(f2, f1)
+#    if not os.path.exists(OperationModesOut):
+#        dataout_dir=os.path.dirname(OperationModesOut)
+#        print("Creating dataout_dir= {0}" .format(dataout_dir))
+#        os.makedirs(dataout_dir)
+#    with open(OperationModesOut, 'w') as ModeFile:
+#        ModeFile.write(str(ModeList))
 
-    # ******************************* #
+    ################################################
+    # Residual Capacity dataframe- PWR techs & reduce dataframe linearly vs. cutoff at 2025
+    for n in range(len(SAgriculturalResidualCapacity)):
+        cropagri_key = SAgriculturalResidualCapacity[n]
+        cropagri_val = AgriculturalResidualCapacity[SAgriculturalResidualCapacity[n]]
+        for year in YearsN:
+            RemainingYears = AgriculturalResidualCapacityRetirementYears - (year - min(YearsN))
+            if RemainingYears > 0:
+                ResCap = cropagri_val * float(RemainingYears)/(float(AgriculturalResidualCapacityRetirementYears))
+                ResidCapList.append([Region, "LND" + cropagri_key, str(int(year)), ResCap])
+
+    ################################################
+    # Capital Cost dataframe for each PWR techs
+    for n in range(len(AgriculturalCapitalCost)):
+        print("ASR-Probe::AgriculturalCapitalCost[{0:1d}]= {1}..." .format(n, AgriculturalCapitalCost[n]))
+        for m in range(len(AgriculturalCapitalCost[n])):
+            print("ASR-Probe::AgriculturalCapitalCost[{0:1d}][{1:1d}]= {2}..." .format(n, m, AgriculturalCapitalCost[n][m]))
+        for year in YearsN:
+            CapitalCostList.append([Region, AgriculturalCapitalCost[n][0], str(int(year)), AgriculturalCapitalCost[n][1]])
+#TN - Jumped ahead - Sorry Ashok...
+
+    ############################################
     # Remove any 0's from IAR and OAR #
-    # ******************************* #
-
     for i, dic in enumerate(IARList):
         if float(dic['v']) == float('0'):
             IARList.pop(i)
@@ -756,20 +1056,25 @@ def BuildCLEWsModel(data):
         if float(dic['v']) == float('0'):
             OARList.pop(i)
 
+    ################################################
+    # Create Model Output Files
+    # UPDATE MOMANI WITH NEW DATA #
     if OutputFormat == 'MoManI':
-        # *************************** #
-        # UPDATE MOMANI WITH NEW DATA #
-        # *************************** #
+        print("Updating MoManI with new data...")
         UpdateMoManI(Model, SetNames, NewSetItems, NewSetGroups, IARList, OARList)
 
+    # OUTPUT TO OTOOLE FORMAT #
     if OutputFormat == 'otoole':
-        # *************************** #
-        # output to otoole format     #
-        # *************************** #
-        print("Outputting data in otoole compatible format.")
+        print("Outputting data in otoole compatible format...")
         Updateotoole(SetNames, NewSetItems, IARList, OARList, otooleOutputDirectory)
 
+    if OutputFormat == 'append_otoole':
+        Appendotoole(SetNames, NewSetItems, ResidCapList, CapitalCostList, IARList, OARList,
+                otooleOutputDirectory, OsemosysGlobalPath, Debug)
 
+################################################################################
+# Main function::Calls Build CLEWs Model
+################################################################
 def main():
     import argparse, yaml
     ##########
@@ -785,16 +1090,33 @@ def main():
     if args.file:
         with open(args.file, "r") as file_descriptor:
             data = yaml.safe_load(file_descriptor)
-        BuildCLEWsModel(data)
+        BuildCLEWsModel(data, args.file)
 
+################################################################################
+# Function to build CLI arguments
+################################################################
 def build(args):
     import yaml, os
     if args.yamlfile:
         with open(os.path.join(os.getcwd(), args.yamlfile), "r") as file_descriptor:
             data = yaml.safe_load(file_descriptor)
-        BuildCLEWsModel(data)
+        BuildCLEWsModel(data, args.file)
 
+################################################################################
+# clewsy runtime interface
+################################################################
 if __name__ == "__main__":
+    import logging
+    import sys
     logging.basicConfig(level=logging.DEBUG)
-    datafile = sys.argv[1]
-    build(datafile)
+    print("ASR-Probe::IDX1B- Got here...")
+    param = sys.argv[1]
+    print("ASR-Probe::param= {0}..." .format(param))
+    if param != "build":
+        print("ASR-Probe::model_building local/debug run...")
+        main()
+    else:
+        print("ASR-Probe::model_building distro run...")
+        datafile = param
+        build(datafile)
+
