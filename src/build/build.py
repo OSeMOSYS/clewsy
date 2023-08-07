@@ -485,7 +485,7 @@ def BuildCLEWsModel(data, yaml_file):
             DataDirectoryName, OsemosysGlobalPath, ClusterBaseFileName, PrecipitationClusterBaseFileName,
             EvapotranspirationClusterBaseFileName, IrrigationWaterDeficitClusterBaseFileName))
     print("--------------------------------\n")
-    user_inp = raw_input("BuildCLEWsModel parameters OK? (<Y=Yes>/*=No)")
+    user_inp = input("BuildCLEWsModel parameters OK? (<Y=Yes>/*=No)")
     if user_inp != "Y":
         sys.exit("Please correct BuildCLEWsModel parameters & re-run... Exiting!!!")
 
@@ -1076,7 +1076,12 @@ def BuildCLEWsModel(data, yaml_file):
 # Main function::Calls Build CLEWs Model
 ################################################################
 def main():
+    import sys
     import argparse, yaml
+    print("Python version= {0}..." .format(sys.version))
+    if sys.version_info[0] < 3:
+        sys.exit("Please use Python version > 3... Exiting!!!")
+
     ##########
     # For handling unintentional boolean operators from yaml file
     from yaml.constructor import Constructor
