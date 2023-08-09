@@ -365,7 +365,7 @@ Tue 16 May 2023 03:39:09 PM PDT
 	On: python src/build/build.py CLEWS-KEN.yaml >> data-out/
 
 Sun 21 May 2023 07:50:36 PM PDT
-/* ASR- TODO: Update README.rst:: */
+/* ASR- TODO>>DONE: Update README.rst:: */
 Run commands:
 	python src/build/build.py CLEWS-CAN.yaml; python src/build/build.py CLEWS-KEN.yaml
 	otoole --verbose convert csv datafile data-out data-test-KEN.txt config_otoole.yaml >>
