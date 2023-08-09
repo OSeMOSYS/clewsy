@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """ Generlized clewsy: python script::
 
     Country Code 3 letters  == <ccd>
